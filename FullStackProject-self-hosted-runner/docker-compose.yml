@@ -1,0 +1,20 @@
+services:
+  da2-self-hosted-runner:
+    build:
+      context: .
+      args:
+        ARCH: ${ARCH}
+    image: dotnet-self-hosted-runner
+    container_name: da2-self-hosted-runner
+
+    environment:
+      REPO_URL: ${REPO_URL}
+      GITHUB_PAT: ${GITHUB_PAT}
+      RUNNER_NAME: ${RUNNER_NAME}
+
+    volumes:
+      - runner-data:/runner/_work
+    restart: unless-stopped
+
+volumes:
+  runner-data:
