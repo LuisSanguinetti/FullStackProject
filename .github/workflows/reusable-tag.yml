@@ -1,0 +1,98 @@
+name: Tag
+on:
+  workflow_call:
+    inputs:
+      mayor:
+        type: string
+        description: Branch to upgrade mayor version
+        required: true
+      minor:
+        type: string
+        description: Branch to upgrade minor version
+        required: true
+      patch:
+       type: string
+       description: Branch to upgrade patch version
+       required: true
+
+jobs:
+  tag:
+    name: Tag
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get Tags
+        id: get_tags
+        run: |
+          # find the highest-numbered version tag, bump the patch
+          # version, and push that as a new tag.
+          #
+          # if the patch version was omitted, restart numbering there.
+          #
+          # example:
+          #   3.1.0 yields 3.1.1
+          #   3.2 yields 3.2.0
+          #   <no tags> yields 0.0.1
+          #   abc-1.2.9 yields abc-1.2.10
+          #
+          # if the push is to main only updates mayor version
+          
+          # Fetch the tags
+          git fetch --tags origin
+          
+          # Find the latest tag
+          GIT_TAGS=$(git tag | egrep '^[0-9]+\.[0-9]+(\.[0-9]+)?$' || true)
+
+          # Set the output
+          echo "GIT_TAGS=$GIT_TAGS"
+          echo "::set-output name=tags::$GIT_TAGS"
+          
+      - name: Bumped Tag
+        id: bumped_tag
+        run: |
+          # Use the GIT_TAGS output from the previous step
+          GIT_TAGS="${{ steps.get_tags.outputs.tags }}"
+          
+          if [ -z "$GIT_TAGS" ]; then
+            LATEST="0.0.0"
+          else
+            LATEST=$(
+              git tag --list |
+              egrep '^[0-9]+\.[0-9]+(\.[0-9]+)?$' |
+              sort -V |
+              tail -n 1
+            )
+          fi
+
+          if [ "${{ github.ref_name }}" == "${{ inputs.mayor }}" ]; then
+            # Bump the major version
+            BUMPED=$(echo $LATEST | awk -F. '{ print ($1 + 1) ".0.0" }')
+          
+          elif [ "${{ github.ref_name }}" == "${{ inputs.minor }}" ]; then
+            # Bump the major version
+            BUMPED=$(echo $LATEST | awk -F. '{ print $1 "." ($2 + 1) ".0" }')
+
+          elif [ "${{ github.ref_name }}" == "${{ inputs.patch }}"]; then
+            # Bump the patch version
+            BUMPED=$(echo $LATEST | awk -F. '{ print $1 "." $2 "." ($3 + 1) }')
+          
+          # elif echo $LATEST | egrep '^[0-9]+\.[0-9]+$'; then
+          #  BUMPED="${LATEST}.0"
+          fi
+          
+          echo "bumping ${LATEST} to ${BUMPED}"
+          
+          echo "::set-output name=bumped::$BUMPED"
+          
+      - name: Push Bumped Tag
+        run: |
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git config --global user.name "${{ github.actor }}"
+
+          BUMPED="${{ steps.bumped_tag.outputs.bumped }}"
+          
+          git tag --annotate "$BUMPED" --message "via GitHub Actions"
+          git push origin "$BUMPED"

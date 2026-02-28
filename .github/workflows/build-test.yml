@@ -12,7 +12,7 @@ jobs:
   run:
     name: Run
     #    a uses: IngSoft-DA2/workflows/.github/workflows/reusable-build-test.yml@self-hosted-runner
-    uses: IngSoft-DA2/workflows/.github/workflows/reusable-build-test.yml@main
+    uses: ./.github/workflows/reusable-build-test.yml
     permissions: write-all
     with:
       solution-name: backend/Obligatorio.sln

@@ -12,7 +12,7 @@ jobs:
   run:
     name: Run
     # temporary fix do the self host after,  uses: IngSoft-DA2/workflows/.github/workflows/reusable-code-analysis.yml@self-hosted-runner
-    uses: IngSoft-DA2/workflows/.github/workflows/reusable-code-analysis.yml@main
+    uses: ./.github/workflows/reusable-code-analysis.yml
     permissions: write-all
     with:
       solution-name: FullStackProjectBackend.sln

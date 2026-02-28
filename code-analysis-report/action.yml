@@ -1,0 +1,61 @@
+name: 'Generate Clean Code Analysis Table'
+description: 'Parses format anlysis report and creates a Markdown summary.'
+author: 'Daniel Acevedo'
+inputs:
+  filename:
+    description: 'Path to format-report.json'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Generate Clean Code Analysis Report
+      shell: bash
+      run: |
+        python3 <<EOF
+        import json
+        import sys
+        import os
+
+        filename = "${{ inputs.filename }}"
+
+        if not os.path.isfile(filename):
+            print(f"❌ File not found: {filename}", file=sys.stderr)
+            sys.exit(1)
+
+        with open(filename, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        files = data.get("files", [])
+        issue_count = 0
+
+        table = "| File | Issues |\n"
+        table += "|------|--------|\n"
+
+        for file_entry in files:
+            filename = file_entry.get("filePath", "Unknown file")
+            diagnostics = file_entry.get("diagnostics", [])
+            count = len(diagnostics)
+            issue_count += count
+            status = "✅" if count == 0 else f"❌ {count}"
+            table += f"| {filename} | {status} |\n"
+
+        table += "|------|--------|\n"
+        table += f"| **Total** | **{'✅' if issue_count == 0 else f'❌ {issue_count}'}** |\n"
+
+        if issue_count == 0:
+            table += "\n*Awesome! No code analysis issues found. 🚀*\n"
+        else:
+            table += "\n*Please fix the issues above before merging.*\n"
+
+        output_file = "clean-code-analysis-table.md"
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(table)
+
+        print("\n" + table)
+
+        if issue_count > 0:
+            print(f"❌ Clean code analysis failed with {issue_count} issues.", file=sys.stderr)
+            sys.exit(1)
+        else:
+            print(f"✅ Clean code analysis passed.")
+        EOF
