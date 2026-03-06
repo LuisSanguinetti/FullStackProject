@@ -38,7 +38,7 @@ public class RepositoryTest
     [TestMethod]
     public void Add_ShouldAddUserToDatabase()
     {
-        var u = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1), MembershipLevel.Premium);
+        var u = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1));
         var result = _repository!.Add(u);
 
         Assert.IsNotNull(result);
@@ -49,7 +49,7 @@ public class RepositoryTest
     [TestMethod]
     public void Find_ShouldReturnUserWhenExists()
     {
-        var u = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1), MembershipLevel.Premium);
+        var u = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1));
         _context!.Set<User>().Add(u);
         _context.SaveChanges();
 
@@ -71,8 +71,8 @@ public class RepositoryTest
     public void FindAll_ShouldReturnAllUsers()
     {
         _context!.Set<User>().AddRange(
-            new User("Peter", "Parker", "peter@dailybugle.com", "sp1der", new DateOnly(1995, 8, 10), MembershipLevel.Premium),
-            new User("Clark", "Kent", "clark@dailyplanet.com", "krYpt0", new DateOnly(1980, 6, 18), MembershipLevel.VIP)
+            new User("Peter", "Parker", "peter@dailybugle.com", "sp1der", new DateOnly(1995, 8, 10)),
+            new User("Clark", "Kent", "clark@dailyplanet.com", "krYpt0", new DateOnly(1980, 6, 18))
         );
         _context.SaveChanges();
 
@@ -86,7 +86,7 @@ public class RepositoryTest
     [TestMethod]
     public void Update_ShouldModifyUser()
     {
-        var u = new User("Steve", "Rogers", "steve@avengers.com", "shield", new DateOnly(1918, 7, 4), MembershipLevel.Standard);
+        var u = new User("Steve", "Rogers", "steve@avengers.com", "shield", new DateOnly(1918, 7, 4));
         _context!.Set<User>().Add(u);
         _context.SaveChanges();
 
@@ -100,7 +100,7 @@ public class RepositoryTest
     [TestMethod]
     public void Delete_ShouldRemoveUser()
     {
-        var u = new User("Steve", "Rogers", "steve@avengers.com", "shield", new DateOnly(1918, 7, 4), MembershipLevel.Standard);
+        var u = new User("Steve", "Rogers", "steve@avengers.com", "shield", new DateOnly(1918, 7, 4));
         _context!.Set<User>().Add(u);
         _context.SaveChanges();
 
@@ -112,7 +112,7 @@ public class RepositoryTest
     [TestMethod]
     public void Add_ShouldReturnSameInstanceInserted()
     {
-        var u = new User("Ted", "Lasso", "ted@football.org", "lasso", new DateOnly(1985, 8, 1), MembershipLevel.Premium);
+        var u = new User("Ted", "Lasso", "ted@football.org", "lasso", new DateOnly(1985, 8, 1));
         var result = _repository!.Add(u);
 
         Assert.IsTrue(object.ReferenceEquals(u, result));
@@ -132,7 +132,7 @@ public class RepositoryTest
         var roleRepo = new Repository<Role>(_context!);
         var userRoleRepo = new Repository<UserRole>(_context!);
 
-        var u = userRepo.Add(new User("Inc", "User", "inc@example.com", "pwd", new DateOnly(2001, 1, 1), MembershipLevel.Standard));
+        var u = userRepo.Add(new User("Inc", "User", "inc@example.com", "pwd", new DateOnly(2001, 1, 1)));
         var r = roleRepo.Add(new Role("Admin"));
 
         _context!.Set<UserRole>().Add(new UserRole { UserId = u.Id, RoleId = r.Id, User = u, Role = r });
@@ -150,7 +150,7 @@ public class RepositoryTest
         var userRepo = new Repository<User>(_context!);
         var roleRepo = new Repository<Role>(_context!);
         var userRoleRepo = new Repository<UserRole>(_context!);
-        var user = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1), MembershipLevel.Premium);
+        var user = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1));
 
         var u = userRepo.Add(user);
         var r = roleRepo.Add(new Role("User"));
@@ -171,7 +171,7 @@ public class RepositoryTest
         var roleRepo = new Repository<Role>(_context!);
         var userRoleRepo = new Repository<UserRole>(_context!);
 
-        var u = userRepo.Add(new User("All", "In", "allin@test.com", "pwd", new DateOnly(2002, 2, 2), MembershipLevel.Standard));
+        var u = userRepo.Add(new User("All", "In", "allin@test.com", "pwd", new DateOnly(2002, 2, 2)));
         var r = roleRepo.Add(new Role("Member"));
         _context!.Set<UserRole>().Add(new UserRole { UserId = u.Id, RoleId = r.Id, User = u, Role = r });
         _context.SaveChanges();
@@ -187,13 +187,13 @@ public class RepositoryTest
     {
         // Arrange
         _context!.Set<User>().AddRange(
-            new User("U1", "A", "a@ex.com", "p1", new DateOnly(2000, 1, 1), MembershipLevel.Standard),
-            new User("U2", "B", "b@ex.com", "p2", new DateOnly(2000, 2, 1), MembershipLevel.Standard),
-            new User("U3", "C", "c@ex.com", "p3", new DateOnly(2000, 3, 1), MembershipLevel.Standard),
-            new User("U4", "D", "d@ex.com", "p4", new DateOnly(2000, 4, 1), MembershipLevel.Standard),
-            new User("U5", "E", "e@ex.com", "p5", new DateOnly(2000, 5, 1), MembershipLevel.Standard),
-            new User("U6", "F", "f@ex.com", "p6", new DateOnly(2000, 6, 1), MembershipLevel.Standard),
-            new User("U7", "G", "g@ex.com", "p7", new DateOnly(2000, 7, 1), MembershipLevel.Standard)
+            new User("U1", "A", "a@ex.com", "p1", new DateOnly(2000, 1, 1)),
+            new User("U2", "B", "b@ex.com", "p2", new DateOnly(2000, 2, 1)),
+            new User("U3", "C", "c@ex.com", "p3", new DateOnly(2000, 3, 1)),
+            new User("U4", "D", "d@ex.com", "p4", new DateOnly(2000, 4, 1)),
+            new User("U5", "E", "e@ex.com", "p5", new DateOnly(2000, 5, 1)),
+            new User("U6", "F", "f@ex.com", "p6", new DateOnly(2000, 6, 1)),
+            new User("U7", "G", "g@ex.com", "p7", new DateOnly(2000, 7, 1))
         );
         _context.SaveChanges();
 
@@ -218,7 +218,7 @@ public class RepositoryTest
         var roleRepo = new Repository<Role>(_context!);
         var userRoleRepo = new Repository<UserRole>(_context!);
 
-        var u = userRepo.Add(new User("NF", "User", "nf@test.com", "pwd", new DateOnly(2001, 1, 1), MembershipLevel.Standard));
+        var u = userRepo.Add(new User("NF", "User", "nf@test.com", "pwd", new DateOnly(2001, 1, 1)));
         var r = roleRepo.Add(new Role("MemberNF"));
         _context!.Set<UserRole>().Add(new UserRole { UserId = u.Id, RoleId = r.Id, User = u, Role = r });
         _context.SaveChanges();
@@ -242,12 +242,12 @@ public class RepositoryTest
 
         for (var i = 0; i < 5; i++)
         {
-            _context!.Set<UserRole>().Add(new UserRole { User = userRepo.Add(new User($"U{i}", "A", $"u{i}@ex.com", "p", new DateOnly(2000,1,1), MembershipLevel.Standard)), Role = r1, RoleId = r1.Id });
+            _context!.Set<UserRole>().Add(new UserRole { User = userRepo.Add(new User($"U{i}", "A", $"u{i}@ex.com", "p", new DateOnly(2000,1,1))), Role = r1, RoleId = r1.Id });
         }
 
         for (var i = 0; i < 2; i++)
         {
-            _context!.Set<UserRole>().Add(new UserRole { User = userRepo.Add(new User($"V{i}", "B", $"v{i}@ex.com", "p", new DateOnly(2000,1,1), MembershipLevel.Standard)), Role = r2, RoleId = r2.Id });
+            _context!.Set<UserRole>().Add(new UserRole { User = userRepo.Add(new User($"V{i}", "B", $"v{i}@ex.com", "p", new DateOnly(2000,1,1))), Role = r2, RoleId = r2.Id });
         }
 
         _context.SaveChanges();

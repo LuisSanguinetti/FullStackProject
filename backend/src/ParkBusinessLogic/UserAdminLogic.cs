@@ -1,5 +1,4 @@
-﻿using System;
-using Domain;
+﻿using Domain;
 using IDataAccess;
 using IParkBusinessLogic;
 using Park.BusinessLogic.Exceptions;
@@ -23,27 +22,27 @@ public class UserAdminLogic : IUserAdminLogic
 
     public User CreateAdmin(string name, string surname, string email, string password, DateOnly dateOfBirth)
     {
-        return CreateWithRole(name, surname, email, password, dateOfBirth, MembershipLevel.Standard, RoleAdmin);
+        return CreateWithRole(name, surname, email, password, dateOfBirth, RoleAdmin);
     }
 
     public User CreateOperator(string name, string surname, string email, string password, DateOnly dateOfBirth)
     {
-       return CreateWithRole(name, surname, email, password, dateOfBirth, MembershipLevel.Standard, RoleOperator);
+       return CreateWithRole(name, surname, email, password, dateOfBirth, RoleOperator);
     }
 
-    public User CreateVisitor(string name, string surname, string email, string password, DateOnly dateOfBirth, MembershipLevel membership)
+    public User CreateVisitor(string name, string surname, string email, string password, DateOnly dateOfBirth)
     {
-        return CreateWithRole(name, surname, email, password, dateOfBirth, membership, RoleVisitor);
+        return CreateWithRole(name, surname, email, password, dateOfBirth, RoleVisitor);
     }
 
-    private User CreateWithRole(string name, string surname, string email, string password, DateOnly dob, MembershipLevel membership, string roleName)
+    private User CreateWithRole(string name, string surname, string email, string password, DateOnly dob, string roleName)
     {
         ValidateEmail(email);
         EnsureEmailUnique(email);
 
         var normalizedEmail = email.Trim().ToLowerInvariant();
 
-        var user = new User(name, surname, normalizedEmail, password, dob, membership);
+        var user = new User(name, surname, normalizedEmail, password, dob);
         user = _userRepo.Add(user);
 
         _userRoleLogic.AssignRoleByName(user.Id, roleName);
@@ -77,5 +76,11 @@ public class UserAdminLogic : IUserAdminLogic
         }
 
         _userRepo.Delete(id);
+    }
+
+    public User GetByIdOrThrow(Guid id)
+    {
+        return _userRepo.Find(u => u.Id == id)
+               ?? throw new KeyNotFoundException($"User with id: {id} not found");
     }
 }

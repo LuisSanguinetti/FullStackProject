@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Domain;
 using FluentAssertions;
 using IDataAccess;
@@ -45,7 +42,7 @@ public class AuthAttributeTest
     [TestMethod]
     public async Task Auth_Allows_When_TokenValid_And_NoRoleRequired()
     {
-        var user = new User("Alice", "Baker", "a@x", "p", new DateOnly(1990, 1, 1), MembershipLevel.Standard) { Id = Guid.NewGuid() };
+        var user = new User("Alice", "Baker", "a@x", "p", new DateOnly(1990, 1, 1)) { Id = Guid.NewGuid() };
         var token = Guid.NewGuid();
 
         var sessionMock = new Mock<ISessionLogic>(MockBehavior.Strict);
@@ -118,7 +115,7 @@ public class AuthAttributeTest
     [TestMethod]
     public async Task Auth_Allows_When_RoleRequired_ByName_Present()
     {
-        var user = new User("Alice","Baker","a@x","p", new DateOnly(1990,1,1), MembershipLevel.Standard){ Id = Guid.NewGuid() };
+        var user = new User("Alice","Baker","a@x","p", new DateOnly(1990,1,1)){ Id = Guid.NewGuid() };
         var token = Guid.NewGuid();
 
         var sessionMock = new Mock<ISessionLogic>(MockBehavior.Strict);
@@ -141,7 +138,7 @@ public class AuthAttributeTest
     [TestMethod]
     public async Task Auth_Throws401_When_RoleRequired_ByName_Missing()
     {
-        var user = new User("Alice","Baker","a@x","p", new DateOnly(1990,1,1), MembershipLevel.Standard){ Id = Guid.NewGuid() };
+        var user = new User("Alice","Baker","a@x","p", new DateOnly(1990,1,1)){ Id = Guid.NewGuid() };
         var token = Guid.NewGuid();
 
         var sessionMock = new Mock<ISessionLogic>(MockBehavior.Strict);

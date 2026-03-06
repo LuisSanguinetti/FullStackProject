@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using Domain;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace obligatorio.WebApi.DTO;
 
@@ -23,8 +21,6 @@ public class OperatorCreateDto : UserCreateBaseDto { }
 
 public class VisitorCreateDto : UserCreateBaseDto
 {
-    [Required]
-    public MembershipLevel Membership { get; set; }
 }
 
 public class UserGetDtos
@@ -34,15 +30,13 @@ public class UserGetDtos
     public string Surname { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
-    public MembershipLevel Membership { get; set; }
 
-    public UserGetDtos(Guid id, string name, string surname, string email, string role, MembershipLevel membership)
+    public UserGetDtos(Guid id, string name, string surname, string email, string role)
     {
         Id = id;
         Name = name;
         Surname = surname;
         Email = email;
         Role = role;
-        Membership = membership;
     }
 }

@@ -11,7 +11,6 @@ public class User
     public required string Email { get; set; }
     public required string Password { get; set; }
     public DateOnly DateOfBirth { get; set; }
-    public MembershipLevel Membership { get; set; }
     public int Points { get; set; }
 
     public User()
@@ -19,7 +18,7 @@ public class User
     }
 
     [SetsRequiredMembers]
-    public User(string name, string surname, string email, string password, DateOnly dateOfBirth, MembershipLevel membership)
+    public User(string name, string surname, string email, string password, DateOnly dateOfBirth)
     {
         Id = Guid.NewGuid();
         Name = name;
@@ -27,7 +26,6 @@ public class User
         Email = email;
         Password = password;
         DateOfBirth = dateOfBirth;
-        Membership = membership;
         Points = 0;
     }
 }

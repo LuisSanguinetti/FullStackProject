@@ -25,5 +25,5 @@ public sealed class UserRegisterDto
     public DateOnly DateOfBirth { get; init; }
 
     public static User DtoToDom(UserRegisterDto d) =>
-        new User(d.Name, d.Surname, d.Email, d.Password, d.DateOfBirth, MembershipLevel.Standard);
+        new User(d.Name, d.Surname, d.Email, d.Password, d.DateOfBirth);
 }

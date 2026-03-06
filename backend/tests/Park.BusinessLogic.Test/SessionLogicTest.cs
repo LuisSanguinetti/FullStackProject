@@ -23,7 +23,7 @@ public class SessionLogicTest
     public void CreateSession_CreatesAndPersistsSession_ReturnsSessionId()
     {
         // arrange
-        var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1), MembershipLevel.Standard);
+        var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1));
 
         Session? captured = null;
         _repoSessionMock
@@ -53,7 +53,7 @@ public class SessionLogicTest
     public void DeleteSession_DeletesSession_WhenTokenExists()
     {
         // arrange
-        var user = new User("Bob", "Carson", "bob@x", "p", new DateOnly(1991, 2, 2), MembershipLevel.Standard);
+        var user = new User("Bob", "Carson", "bob@x", "p", new DateOnly(1991, 2, 2));
         var existing = new Session(user);
 
         _repoSessionMock
@@ -97,7 +97,7 @@ public class SessionLogicTest
     public void GetUserBySession_ReturnsUser_WhenSessionExists()
     {
         var token = Guid.NewGuid();
-        var user = new User("Alice","Baker","a@x","p", new DateOnly(1990,1,1), MembershipLevel.Standard) { Id = Guid.NewGuid() };
+        var user = new User("Alice","Baker","a@x","p", new DateOnly(1990,1,1)) { Id = Guid.NewGuid() };
         var session = new Session(user) { Token = token, User = user, UserId = user.Id };
 
         _repoSessionMock

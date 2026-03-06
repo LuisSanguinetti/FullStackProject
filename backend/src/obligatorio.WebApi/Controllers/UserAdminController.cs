@@ -1,6 +1,4 @@
-﻿using System;
-using Domain;
-using IParkBusinessLogic;
+﻿using IParkBusinessLogic;
 using Microsoft.AspNetCore.Mvc;
 using obligatorio.WebApi.DTO;
 
@@ -17,28 +15,22 @@ public class UserAdminController : ControllerBase
     public IActionResult CreateAdmin([FromBody] AdminCreateDto dto)
     {
         var u = _logic.CreateAdmin(dto.Name, dto.Surname, dto.Email, dto.Password, dto.DateOfBirth);
-        return CreatedAtAction(nameof(GetById), new { id = u.Id },
-            new UserGetDtos(u.Id, u.Name, u.Surname, u.Email, "Admin", u.Membership));
+        return CreatedAtAction(nameof(CreateAdmin), new { id = u.Id }, new UserGetDtos(u.Id, u.Name, u.Surname, u.Email, "Admin"));
     }
 
     [HttpPost("operators")]
     public IActionResult CreateOperator([FromBody] OperatorCreateDto dto)
     {
         var u = _logic.CreateOperator(dto.Name, dto.Surname, dto.Email, dto.Password, dto.DateOfBirth);
-        return CreatedAtAction(nameof(GetById), new { id = u.Id },
-            new UserGetDtos(u.Id, u.Name, u.Surname, u.Email, "Operator", u.Membership));
+        return CreatedAtAction(nameof(CreateOperator), new { id = u.Id }, new UserGetDtos(u.Id, u.Name, u.Surname, u.Email, "Operator"));
     }
 
     [HttpPost("visitors")]
     public IActionResult CreateVisitor([FromBody] VisitorCreateDto dto)
     {
-        var u = _logic.CreateVisitor(dto.Name, dto.Surname, dto.Email, dto.Password, dto.DateOfBirth, dto.Membership);
-        return CreatedAtAction(nameof(GetById), new { id = u.Id },
-            new UserGetDtos(u.Id, u.Name, u.Surname, u.Email, "Visitor", u.Membership));
+        var u = _logic.CreateVisitor(dto.Name, dto.Surname, dto.Email, dto.Password, dto.DateOfBirth);
+        return CreatedAtAction(nameof(CreateVisitor), new { id = u.Id }, new UserGetDtos(u.Id, u.Name, u.Surname, u.Email, "Visitor"));
     }
-
-    [HttpGet("{id:guid}")]
-    public ActionResult<UserGetDtos> GetById(Guid id) => NotFound();
 
     [HttpDelete("{id:guid}")]
     public IActionResult Delete(Guid id)

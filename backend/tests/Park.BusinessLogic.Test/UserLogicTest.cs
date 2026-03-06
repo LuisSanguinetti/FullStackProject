@@ -2,9 +2,7 @@ using System.Linq.Expressions;
 using Domain;
 using FluentAssertions;
 using IDataAccess;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Moq;
-using obligatorio.WebApi.Filters;
 using Park.BusinessLogic.Exceptions;
 
 namespace Park.BusinessLogic.Test;
@@ -40,8 +38,8 @@ public class UserLogicTest
         // arrange
         var expected = new List<User>
         {
-            new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1), MembershipLevel.Standard),
-            new User("Bob", "Carson", "bob@x", "p", new DateOnly(1991, 2, 2), MembershipLevel.Standard),
+            new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1)),
+            new User("Bob", "Carson", "bob@x", "p", new DateOnly(1991, 2, 2)),
         };
 
         _repoMock
@@ -147,10 +145,10 @@ public class UserLogicTest
         // assert
         capturedOrderBy.Should().NotBeNull();
 
-        var u1 = new User("Bob", "Carson", "1@x", "p", new DateOnly(1990, 1, 1), MembershipLevel.Standard) { Id = Guid.Parse("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA1") };
-        var u2 = new User("Alice", "Carson", "2@x", "p", new DateOnly(1991, 2, 2), MembershipLevel.Standard) { Id = Guid.Parse("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA2") };
-        var u3 = new User("Alice", "Baker", "3@x", "p", new DateOnly(1992, 3, 3), MembershipLevel.Standard) { Id = Guid.Parse("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA3") };
-        var u4 = new User("Alice", "Baker", "4@x", "p", new DateOnly(1993, 4, 4), MembershipLevel.Standard) { Id = Guid.Parse("00000000-0000-0000-0000-000000000004") };
+        var u1 = new User("Bob", "Carson", "1@x", "p", new DateOnly(1990, 1, 1)) { Id = Guid.Parse("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA1") };
+        var u2 = new User("Alice", "Carson", "2@x", "p", new DateOnly(1991, 2, 2)) { Id = Guid.Parse("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA2") };
+        var u3 = new User("Alice", "Baker", "3@x", "p", new DateOnly(1992, 3, 3)) { Id = Guid.Parse("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAA3") };
+        var u4 = new User("Alice", "Baker", "4@x", "p", new DateOnly(1993, 4, 4)) { Id = Guid.Parse("00000000-0000-0000-0000-000000000004") };
 
         var input = new List<User> { u1, u2, u3, u4 }.AsQueryable();
         var ordered = capturedOrderBy!(input).ToList();
@@ -162,7 +160,7 @@ public class UserLogicTest
     public void RegisterVisitor_AddsUser_ToRepository()
     {
         // arrange
-        var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1), MembershipLevel.Standard);
+        var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1));
 
         _repoMock
             .Setup(r => r.Add(It.Is<User>(u =>
@@ -170,8 +168,7 @@ public class UserLogicTest
                 u.Surname == "Baker" &&
                 u.Email == "alice@x" &&
                 u.Password == "p" &&
-                u.DateOfBirth == new DateOnly(1990, 1, 1) &&
-                u.Membership == MembershipLevel.Standard)))
+                u.DateOfBirth == new DateOnly(1990, 1, 1))))
             .Returns((User u) => u)
             .Verifiable();
 
@@ -186,7 +183,7 @@ public class UserLogicTest
     public void RegisterVisitor_PassesSameInstance()
     {
         // arrange
-        var user = new User("Bob", "Carson", "bob@x", "p", new DateOnly(1991, 2, 2), MembershipLevel.Standard);
+        var user = new User("Bob", "Carson", "bob@x", "p", new DateOnly(1991, 2, 2));
 
         _repoMock
             .Setup(r => r.Add(It.Is<User>(u => ReferenceEquals(u, user))))
@@ -204,12 +201,12 @@ public class UserLogicTest
     public void RegisterVisitor_ThrowsDuplicateEmail_WhenEmailExists()
     {
         // arrange:
-        var existing = new User("Eve", "Doe", "dup@x", "p", new DateOnly(1990,1,1), MembershipLevel.Standard);
+        var existing = new User("Eve", "Doe", "dup@x", "p", new DateOnly(1990,1,1));
         _repoMock
             .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
             .Returns(existing);
 
-        var newUser = new User("New", "User", "dup@x", "p", new DateOnly(1995,5,5), MembershipLevel.Standard);
+        var newUser = new User("New", "User", "dup@x", "p", new DateOnly(1995,5,5));
 
         // act
         Action act = () => _logic.RegisterVisitor(newUser);
@@ -222,7 +219,7 @@ public class UserLogicTest
     public void Login_ReturnsToken_AndCreatesSession_WhenCredentialsValid()
     {
         // arrange
-        var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1), MembershipLevel.Standard);
+        var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1));
 
         // User repo:
         _repoMock
@@ -294,8 +291,8 @@ public class UserLogicTest
     {
         // arrange
         var id = Guid.NewGuid();
-        var user = new User("Old", "User", "old@x", "oldp", new DateOnly(1990,1,1), MembershipLevel.Standard) { Id = id };
-        var dupe = new User("Someone", "Else", "new@x", "p", new DateOnly(1991,1,1), MembershipLevel.Standard) { Id = Guid.NewGuid() };
+        var user = new User("Old", "User", "old@x", "oldp", new DateOnly(1990,1,1)) { Id = id };
+        var dupe = new User("Someone", "Else", "new@x", "p", new DateOnly(1991,1,1)) { Id = Guid.NewGuid() };
 
         var repo = new Mock<IRepository<User>>(MockBehavior.Strict);
         repo.Setup(r => r.Find(It.IsAny<Expression<Func<User,bool>>>()))
@@ -339,7 +336,7 @@ public class UserLogicTest
     {
         // arrange
         var id = Guid.NewGuid();
-        var user = new User("Old", "User", "old@x", "oldp", new DateOnly(1990, 1, 1), MembershipLevel.Standard)
+        var user = new User("Old", "User", "old@x", "oldp", new DateOnly(1990, 1, 1))
         {
             Id = id
         };
@@ -396,7 +393,7 @@ public class UserLogicTest
     {
         // arrange
         var id = Guid.NewGuid();
-        var user = new User("Alice", "Baker", "a@x", "p", new DateOnly(1990,1,1), MembershipLevel.Standard)
+        var user = new User("Alice", "Baker", "a@x", "p", new DateOnly(1990,1,1))
             { Id = id, Points = 10 };
 
         _repoMock
@@ -440,7 +437,7 @@ public class UserLogicTest
     public void GetByIdOrThrow_Returns_User_When_Found()
     {
         var id = Guid.NewGuid();
-        var user = new User("Alice", "Baker", "a@x", "p", new DateOnly(1990,1,1), MembershipLevel.Standard) { Id = id };
+        var user = new User("Alice", "Baker", "a@x", "p", new DateOnly(1990,1,1)) { Id = id };
 
         _repoMock
             .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
@@ -486,7 +483,7 @@ public class UserLogicTest
     [TestMethod]
     public void IsEmailUnique_Returns_False_When_Email_Exists()
     {
-        var existing = new User("Eve", "Doe", "dup@x", "p", new DateOnly(1990,1,1), MembershipLevel.Standard);
+        var existing = new User("Eve", "Doe", "dup@x", "p", new DateOnly(1990,1,1));
 
         _repoMock
             .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
@@ -529,7 +526,7 @@ public class UserLogicTest
         }
 
         var userId = Guid.NewGuid();
-        var user = new User("Alice", "Baker", "alice@x", "p", birthDate, MembershipLevel.Standard)
+        var user = new User("Alice", "Baker", "alice@x", "p", birthDate)
         {
             Id = userId
         };
@@ -548,7 +545,7 @@ public class UserLogicTest
     {
         // arrange
         var id = Guid.NewGuid();
-        var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1), MembershipLevel.Standard) { Id = id };
+        var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1)) { Id = id };
 
         _repoMock
             .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
@@ -587,7 +584,7 @@ public class UserLogicTest
     {
         // arrange
         var userId = Guid.NewGuid();
-        var user = new User("Facundo", "Acu�a", "facu@x", "pass", new DateOnly(2003, 1, 1), MembershipLevel.Standard)
+        var user = new User("Facundo", "Acu�a", "facu@x", "pass", new DateOnly(2003, 1, 1))
         {
             Id = userId,
             Points = 200

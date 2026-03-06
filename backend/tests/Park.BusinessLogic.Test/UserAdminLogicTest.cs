@@ -1,4 +1,3 @@
-using System;
 using System.Linq.Expressions;
 using Domain;
 using FluentAssertions;
@@ -37,11 +36,10 @@ public class UserAdminLogicTest
         _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "Visitor"));
 
         var u = _logic.CreateVisitor("Ana", "Ríos", "ana@x", "p",
-            new DateOnly(2000, 1, 1), MembershipLevel.Standard);
+            new DateOnly(2000, 1, 1));
 
         u.Should().NotBeNull();
         u.Email.Should().Be("ana@x");
-        u.Membership.Should().Be(MembershipLevel.Standard);
 
         _userRepo.Verify(r => r.Add(It.IsAny<User>()), Times.Once);
         _userRoleLogic.Verify(l => l.AssignRoleByName(u.Id, "Visitor"), Times.Once);
@@ -53,7 +51,7 @@ public class UserAdminLogicTest
     public void CreateAdmin_Fails_When_EmailAlreadyExists()
     {
         _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns(new User("Existing", "User", "admin@x", "p", new DateOnly(1990, 1, 1), MembershipLevel.Standard));
+            .Returns(new User("Existing", "User", "admin@x", "p", new DateOnly(1990, 1, 1)));
 
         Action act = () => _logic.CreateAdmin("Juan", "Pérez", "admin@x", "p", new DateOnly(1995, 2, 2));
 
@@ -74,7 +72,7 @@ public class UserAdminLogicTest
                       .Throws(new InvalidOperationException("Role 'Visitor' not found"));
 
         Action act = () => _logic.CreateVisitor("Ana", "Ríos", "ana@x", "p",
-                                new DateOnly(2000, 1, 1), MembershipLevel.Standard);
+                                new DateOnly(2000, 1, 1));
 
         act.Should().Throw<InvalidOperationException>().WithMessage("*Role 'Visitor' not found*");
     }
@@ -96,7 +94,7 @@ public class UserAdminLogicTest
     public void CreateVisitor_Fails_When_Email_IsNullOrWhitespace()
     {
         Action act = () => _logic.CreateVisitor("Ana", "Ríos", "   ", "p",
-            new DateOnly(2000, 1, 1), MembershipLevel.Standard);
+            new DateOnly(2000, 1, 1));
 
         act.Should().Throw<ArgumentException>()
             .WithParameterName("email")
@@ -110,7 +108,7 @@ public class UserAdminLogicTest
     public void CreateVisitor_Fails_When_Email_MissingAtSign()
     {
         Action act = () => _logic.CreateVisitor("Ana", "Ríos", "invalid.email", "p",
-            new DateOnly(2000, 1, 1), MembershipLevel.Standard);
+            new DateOnly(2000, 1, 1));
 
         act.Should().Throw<ArgumentException>()
             .WithParameterName("email")

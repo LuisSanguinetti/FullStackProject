@@ -1,5 +1,3 @@
-using System;
-using Domain;
 using IParkBusinessLogic;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -15,11 +13,11 @@ public class UserAdminControllerTest
     public void CreateVisitor_Returns201()
     {
         var mock = new Mock<IUserAdminLogic>(MockBehavior.Strict);
-        mock.Setup(l => l.CreateVisitor(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<Domain.MembershipLevel>()))
-            .Returns(new Domain.User("N", "S", "v@x", "p", new DateOnly(2000, 1, 1), Domain.MembershipLevel.Standard));
+        mock.Setup(l => l.CreateVisitor(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>()))
+            .Returns(new Domain.User("N", "S", "v@x", "p", new DateOnly(2000, 1, 1)));
 
         var ctl = new UserAdminController(mock.Object);
-        var dto = new VisitorCreateDto { Name = "N", Surname = "S", Email = "v@x", Password = "p", DateOfBirth = DateOnly.MinValue, Membership = MembershipLevel.Standard };
+        var dto = new VisitorCreateDto { Name = "N", Surname = "S", Email = "v@x", Password = "p", DateOfBirth = DateOnly.MinValue};
 
         var res = ctl.CreateVisitor(dto) as CreatedAtActionResult;
         Assert.IsNotNull(res);
@@ -45,7 +43,7 @@ public class UserAdminControllerTest
     {
         var mock = new Mock<IUserAdminLogic>(MockBehavior.Strict);
         mock.Setup(l => l.CreateAdmin(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>()))
-            .Returns(new Domain.User("N", "S", "a@x", "p", new DateOnly(2000, 1, 1), Domain.MembershipLevel.Standard));
+            .Returns(new Domain.User("N", "S", "a@x", "p", new DateOnly(2000, 1, 1)));
 
         var ctl = new UserAdminController(mock.Object);
         var dto = new AdminCreateDto { Name = "N", Surname = "S", Email = "a@x", Password = "p", DateOfBirth = DateOnly.MinValue };
@@ -60,7 +58,7 @@ public class UserAdminControllerTest
     {
         var mock = new Mock<IUserAdminLogic>(MockBehavior.Strict);
         mock.Setup(l => l.CreateOperator(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>()))
-            .Returns(new Domain.User("N", "S", "o@x", "p", new DateOnly(2000, 1, 1), Domain.MembershipLevel.Standard));
+            .Returns(new Domain.User("N", "S", "o@x", "p", new DateOnly(2000, 1, 1)));
 
         var ctl = new UserAdminController(mock.Object);
         var dto = new OperatorCreateDto { Name = "N", Surname = "S", Email = "o@x", Password = "p", DateOfBirth = DateOnly.MinValue };
@@ -71,27 +69,16 @@ public class UserAdminControllerTest
     }
 
     [TestMethod]
-    public void GetById_AlwaysReturns404()
-    {
-        var mock = new Mock<IUserAdminLogic>(MockBehavior.Strict);
-        var ctl = new UserAdminController(mock.Object);
-
-        var res = ctl.GetById(Guid.NewGuid());
-        Assert.IsInstanceOfType(res.Result, typeof(NotFoundResult));
-    }
-
-    [TestMethod]
     public void UserGetDtos_Properties_SetAndGet()
     {
         var empty = string.Empty;
-        var dto = new UserGetDtos(Guid.Empty, empty, empty, empty, empty, MembershipLevel.Standard)
+        var dto = new UserGetDtos(Guid.Empty, empty, empty, empty, empty)
         {
             Id = Guid.NewGuid(),
             Name = "TestName",
             Surname = "TestSurname",
             Email = "test@example.com",
             Role = "TestRole",
-            Membership = MembershipLevel.VIP
         };
 
         // Assert
@@ -100,20 +87,18 @@ public class UserAdminControllerTest
         Assert.AreEqual("TestSurname", dto.Surname);
         Assert.AreEqual("test@example.com", dto.Email);
         Assert.AreEqual("TestRole", dto.Role);
-        Assert.AreEqual(MembershipLevel.VIP, dto.Membership);
     }
 
     [TestMethod]
     public void UserGetDtos_Constructor_SetsAllProperties()
     {
         var id = Guid.NewGuid();
-        var dto = new UserGetDtos(id, "John", "Doe", "john@test.com", "Admin", MembershipLevel.Premium);
+        var dto = new UserGetDtos(id, "John", "Doe", "john@test.com", "Admin");
 
         Assert.AreEqual(id, dto.Id);
         Assert.AreEqual("John", dto.Name);
         Assert.AreEqual("Doe", dto.Surname);
         Assert.AreEqual("john@test.com", dto.Email);
         Assert.AreEqual("Admin", dto.Role);
-        Assert.AreEqual(MembershipLevel.Premium, dto.Membership);
     }
 }

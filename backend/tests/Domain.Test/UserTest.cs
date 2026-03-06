@@ -1,5 +1,3 @@
-using Domain;
-
 namespace Domain.Test;
 
 [TestClass]
@@ -17,7 +15,7 @@ public class UserTest
 
         // Act
 
-        var user = new User("Luis", "test", "luis@example.com", "Password1", new DateOnly(2000, 1, 1), MembershipLevel.Premium);
+        var user = new User("Luis", "test", "luis@example.com", "Password1", new DateOnly(2000, 1, 1));
 
         // Assert
 
@@ -34,7 +32,7 @@ public class UserTest
     {
         // Arrange
         var id = Guid.NewGuid();
-        var user = new User("Luis", "test", "luis@example.com", "Password1", new DateOnly(2000, 1, 1), MembershipLevel.Premium);
+        var user = new User("Luis", "test", "luis@example.com", "Password1", new DateOnly(2000, 1, 1));
         var name = "Luis";
         var surname = "Test";
         var email = "luis@example.com";

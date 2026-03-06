@@ -31,8 +31,8 @@ public class UserControllerTest
     public void GetUsers_ReturnsDtos_FromLogicUsers()
     {
         // Arrange
-        var u1 = new User("Alice", "Baker", "alice@ex.com", "p1", new DateOnly(1990, 1, 1), MembershipLevel.Standard);
-        var u2 = new User("Bob", "Carson", "bob@ex.com", "p2", new DateOnly(1991, 2, 2), MembershipLevel.Standard);
+        var u1 = new User("Alice", "Baker", "alice@ex.com", "p1", new DateOnly(1990, 1, 1));
+        var u2 = new User("Bob", "Carson", "bob@ex.com", "p2", new DateOnly(1991, 2, 2));
 
         _logicMock
             .Setup(l => l.GetUsersPage(2, 5))
@@ -120,8 +120,7 @@ public class UserControllerTest
                 u.Surname == "Baker" &&
                 u.Email == "alice@ex.com" &&
                 u.Password == "secret!" &&
-                u.DateOfBirth == new DateOnly(1990, 1, 1) &&
-                u.Membership == MembershipLevel.Standard
+                u.DateOfBirth == new DateOnly(1990, 1, 1)
             )))
             .Verifiable();
 
@@ -138,8 +137,7 @@ public class UserControllerTest
             u.Surname == "Baker" &&
             u.Email == "alice@ex.com" &&
             u.Password == "secret!" &&
-            u.DateOfBirth == new DateOnly(1990, 1, 1) &&
-            u.Membership == MembershipLevel.Standard)), Times.Once);
+            u.DateOfBirth == new DateOnly(1990, 1, 1))));
 
         _logicMock.VerifyNoOtherCalls();
     }

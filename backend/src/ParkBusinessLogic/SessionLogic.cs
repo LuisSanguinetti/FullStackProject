@@ -1,7 +1,6 @@
 using Domain;
 using IDataAccess;
 using IParkBusinessLogic;
-using Park.BusinessLogic.Exceptions;
 
 namespace Park.BusinessLogic;
 

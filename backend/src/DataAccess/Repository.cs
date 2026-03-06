@@ -1,4 +1,4 @@
-﻿﻿using System.Collections;
+﻿using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
 using IDataAccess;
@@ -27,7 +27,7 @@ public class Repository<T> : IRepository<T>
     {
         IQueryable<T> query = _context.Set<T>();
 
-        foreach (var include in includes)
+        foreach(var include in includes)
         {
             query = query.Include(include);
         }
@@ -39,12 +39,12 @@ public class Repository<T> : IRepository<T>
     {
         IQueryable<T> query = _context.Set<T>();
 
-        foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach(var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            if ((typeof(IEnumerable).IsAssignableFrom(property.PropertyType) && property.PropertyType != typeof(string)) ||
+            if((typeof(IEnumerable).IsAssignableFrom(property.PropertyType) && property.PropertyType != typeof(string)) ||
                 (property.PropertyType.IsClass && property.PropertyType != typeof(string)))
             {
-                if (_context.Model.FindEntityType(typeof(T))?.FindNavigation(property.Name) != null)
+                if(_context.Model.FindEntityType(typeof(T))?.FindNavigation(property.Name) != null)
                 {
                     query = query.Include(property.Name);
                 }
@@ -58,7 +58,7 @@ public class Repository<T> : IRepository<T>
     {
         IQueryable<T> query = _context.Set<T>();
 
-        foreach (var include in includes)
+        foreach(var include in includes)
         {
             query = query.Include(include);
         }
@@ -70,12 +70,12 @@ public class Repository<T> : IRepository<T>
     {
         IQueryable<T> query = _context.Set<T>();
 
-        foreach (var include in includes)
+        foreach(var include in includes)
         {
             query = query.Include(include);
         }
 
-        if (filter != null)
+        if(filter != null)
         {
             query = query.Where(filter);
         }
@@ -87,17 +87,17 @@ public class Repository<T> : IRepository<T>
     {
         IQueryable<T> query = _context.Set<T>();
 
-        foreach (var include in includes)
+        foreach(var include in includes)
         {
             query = query.Include(include);
         }
 
-        if (filter != null)
+        if(filter != null)
         {
             query = query.Where(filter);
         }
 
-        if (orderBy != null)
+        if(orderBy != null)
         {
             query = orderBy(query);
         }
@@ -118,7 +118,7 @@ public class Repository<T> : IRepository<T>
     public void Delete(Guid id)
     {
         var entity = _context.Set<T>().Find(id);
-        if (entity != null)
+        if(entity != null)
         {
             _context.Set<T>().Remove(entity);
             _context.SaveChanges();

@@ -1,6 +1,4 @@
-﻿using Domain;
-
-namespace Domain.Test;
+﻿namespace Domain.Test;
 
 [TestClass]
 public class UserRoleTest
@@ -9,7 +7,7 @@ public class UserRoleTest
     public void CreateUserRole()
     {
         // Arrange
-        var user = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1), MembershipLevel.Premium);
+        var user = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1));
         var role = new Role("Admin");
 
         // Act
@@ -30,7 +28,7 @@ public class UserRoleTest
         // Arrange
         var ur = new UserRole();
         var id = Guid.NewGuid();
-        var user = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1), MembershipLevel.Premium);
+        var user = new User("John", "Doe", "john@example.com", "password123", new DateOnly(2000, 1, 1));
         var role = new Role("Admin");
 
         // Act
