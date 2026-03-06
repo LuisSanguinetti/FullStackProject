@@ -1,3 +1,4 @@
+using FluentAssertions;
 using IParkBusinessLogic;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -100,5 +101,41 @@ public class UserAdminControllerTest
         Assert.AreEqual("Doe", dto.Surname);
         Assert.AreEqual("john@test.com", dto.Email);
         Assert.AreEqual("Admin", dto.Role);
+    }
+
+    [TestMethod]
+    public void Delete_ReturnsNoContent_WhenUserDeleted()
+    {
+        var id = Guid.NewGuid();
+
+        var mock = new Mock<IUserAdminLogic>(MockBehavior.Strict);
+        mock.Setup(l => l.Delete(id));
+
+        var ctl = new UserAdminController(mock.Object);
+
+        var res = ctl.Delete(id);
+
+        res.Should().BeOfType<NoContentResult>();
+
+        mock.Verify(l => l.Delete(id), Times.Once);
+        mock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void Delete_PropagatesException_WhenUserDoesNotExist()
+    {
+        var id = Guid.NewGuid();
+
+        var mock = new Mock<IUserAdminLogic>(MockBehavior.Strict);
+        mock.Setup(l => l.Delete(id)).Throws(new ArgumentException("User not found"));
+
+        var ctl = new UserAdminController(mock.Object);
+
+        Action act = () => ctl.Delete(id);
+
+        act.Should().Throw<ArgumentException>().WithMessage("*User not found*");
+
+        mock.Verify(l => l.Delete(id), Times.Once);
+        mock.VerifyNoOtherCalls();
     }
 }

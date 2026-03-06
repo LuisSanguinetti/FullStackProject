@@ -283,4 +283,114 @@ public class UserControllerTest
         _logicMock.Verify(l => l.EditProfile(Guid.Empty, dto.Name, dto.Surname, dto.Email, dto.Password, dto.DateOfBirth), Times.Once);
         _logicMock.VerifyNoOtherCalls();
     }
+
+    [TestMethod]
+    public void GetUserId_Returns200_WithUser()
+    {
+        var id = Guid.NewGuid();
+        var user = new User("Ana", "Perez", "ana@x.com", "p", new DateOnly(2000, 1, 1))
+        {
+            Id = id
+        };
+
+        _logicMock
+            .Setup(l => l.GetByIdOrThrow(id))
+            .Returns(user);
+
+        var action = _controller.GetUserId(id);
+
+        var result = action as OkObjectResult;
+        result.Should().NotBeNull();
+        result!.StatusCode.Should().Be(200);
+        result.Value.Should().Be(user);
+
+        _logicMock.Verify(l => l.GetByIdOrThrow(id), Times.Once);
+        _logicMock.VerifyNoOtherCalls();
+        _userRoleLogicMock.VerifyNoOtherCalls();
+        _sessionLogicMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetMyRole_ReturnsGeneral_WhenAuthorization_IsNull()
+    {
+        var action = _controller.GetMyRole(null);
+
+        var result = action as OkObjectResult;
+        result.Should().NotBeNull();
+        result!.StatusCode.Should().Be(200);
+        result.Value.Should().BeEquivalentTo(new { role = "general" });
+
+        _logicMock.VerifyNoOtherCalls();
+        _userRoleLogicMock.VerifyNoOtherCalls();
+        _sessionLogicMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetMyRole_ReturnsGeneral_WhenToken_IsInvalid()
+    {
+        var action = _controller.GetMyRole("Bearer not-a-guid");
+
+        var result = action as OkObjectResult;
+        result.Should().NotBeNull();
+        result!.StatusCode.Should().Be(200);
+        result.Value.Should().BeEquivalentTo(new { role = "general" });
+
+        _logicMock.VerifyNoOtherCalls();
+        _userRoleLogicMock.VerifyNoOtherCalls();
+        _sessionLogicMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetMyRole_ReturnsGeneral_WhenSessionUser_NotFound()
+    {
+        var token = Guid.NewGuid();
+
+        _sessionLogicMock
+            .Setup(l => l.GetUserBySession(token))
+            .Returns((User?)null);
+
+        var action = _controller.GetMyRole($"Bearer {token}");
+
+        var result = action as OkObjectResult;
+        result.Should().NotBeNull();
+        result!.StatusCode.Should().Be(200);
+        result.Value.Should().BeEquivalentTo(new { role = "general" });
+
+        _sessionLogicMock.Verify(l => l.GetUserBySession(token), Times.Once);
+        _logicMock.VerifyNoOtherCalls();
+        _userRoleLogicMock.VerifyNoOtherCalls();
+        _sessionLogicMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetMyRole_ReturnsRole_WhenSessionUser_Exists()
+    {
+        var token = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var user = new User("Ana", "Perez", "ana@x.com", "p", new DateOnly(2000, 1, 1))
+        {
+            Id = userId
+        };
+
+        _sessionLogicMock
+            .Setup(l => l.GetUserBySession(token))
+            .Returns(user);
+
+        _userRoleLogicMock
+            .Setup(l => l.GetRoleByUserId(userId))
+            .Returns("admin");
+
+        var action = _controller.GetMyRole($"Bearer {token}");
+
+        var result = action as OkObjectResult;
+        result.Should().NotBeNull();
+        result!.StatusCode.Should().Be(200);
+        result.Value.Should().BeEquivalentTo(new { role = "admin" });
+
+        _sessionLogicMock.Verify(l => l.GetUserBySession(token), Times.Once);
+        _userRoleLogicMock.Verify(l => l.GetRoleByUserId(userId), Times.Once);
+        _logicMock.VerifyNoOtherCalls();
+        _userRoleLogicMock.VerifyNoOtherCalls();
+        _sessionLogicMock.VerifyNoOtherCalls();
+    }
 }
