@@ -70,4 +70,154 @@ public class UserRoleLogicTest
         Action act = () => _logic.AssignRoleByName(userId, "Operator");
         act.Should().Throw<InvalidOperationException>().WithMessage("*already has role*");
     }
+
+    [TestMethod]
+    public void AssignRoleByName_Throws_When_RoleName_Is_Null()
+    {
+        Action act = () => _logic.AssignRoleByName(Guid.NewGuid(), null!);
+
+        act.Should().Throw<ArgumentException>().WithMessage("Role name required");
+
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Never);
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Never);
+        _userRoleRepo.Verify(r => r.Add(It.IsAny<UserRole>()), Times.Never);
+        _roleRepo.VerifyNoOtherCalls();
+        _userRoleRepo.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void AssignRoleByName_Throws_When_RoleName_Is_Whitespace()
+    {
+        Action act = () => _logic.AssignRoleByName(Guid.NewGuid(), "   ");
+
+        act.Should().Throw<ArgumentException>().WithMessage("Role name required");
+
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Never);
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Never);
+        _userRoleRepo.Verify(r => r.Add(It.IsAny<UserRole>()), Times.Never);
+        _roleRepo.VerifyNoOtherCalls();
+        _userRoleRepo.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetRoleByUserId_ReturnsGeneral_When_UserId_Is_Empty()
+    {
+        var result = _logic.GetRoleByUserId(Guid.Empty);
+
+        result.Should().Be("general");
+
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Never);
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Never);
+        _roleRepo.VerifyNoOtherCalls();
+        _userRoleRepo.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetRoleByUserId_ReturnsAdmin_When_User_Has_Admin_Role()
+    {
+        var userId = Guid.NewGuid();
+        var adminRole = new Role { Id = Guid.NewGuid(), Name = "admin" };
+
+        _roleRepo
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()))
+            .Returns((Expression<Func<Role, bool>> pred) => pred.Compile()(adminRole) ? adminRole : null);
+
+        _userRoleRepo
+            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()))
+            .Returns((Expression<Func<UserRole, bool>> pred) =>
+            {
+                var adminLink = new UserRole { Id = Guid.NewGuid(), UserId = userId, RoleId = adminRole.Id };
+                return pred.Compile()(adminLink) ? adminLink : null;
+            });
+
+        var result = _logic.GetRoleByUserId(userId);
+
+        result.Should().Be("admin");
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Once);
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Once);
+        _roleRepo.VerifyNoOtherCalls();
+        _userRoleRepo.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetRoleByUserId_ReturnsOperator_When_Admin_Not_Found_And_User_Has_Operator_Role()
+    {
+        var userId = Guid.NewGuid();
+        var operatorRole = new Role { Id = Guid.NewGuid(), Name = "operator" };
+
+        _roleRepo
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()))
+            .Returns((Expression<Func<Role, bool>> pred) => pred.Compile()(operatorRole) ? operatorRole : null);
+
+        _userRoleRepo
+            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()))
+            .Returns((Expression<Func<UserRole, bool>> pred) =>
+            {
+                var operatorLink = new UserRole { Id = Guid.NewGuid(), UserId = userId, RoleId = operatorRole.Id };
+                return pred.Compile()(operatorLink) ? operatorLink : null;
+            });
+
+        var result = _logic.GetRoleByUserId(userId);
+
+        result.Should().Be("operator");
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Exactly(2));
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Once);
+        _roleRepo.VerifyNoOtherCalls();
+        _userRoleRepo.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetRoleByUserId_ReturnsGeneral_When_Admin_And_Operator_Do_Not_Exist()
+    {
+        var userId = Guid.NewGuid();
+
+        _roleRepo
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()))
+            .Returns((Role?)null);
+
+        var result = _logic.GetRoleByUserId(userId);
+
+        result.Should().Be("general");
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Exactly(2));
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Never);
+        _roleRepo.VerifyNoOtherCalls();
+        _userRoleRepo.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetRoleByUserId_ReturnsGeneral_When_Admin_And_Operator_Exist_But_User_Has_None()
+    {
+        var userId = Guid.NewGuid();
+        var adminRole = new Role { Id = Guid.NewGuid(), Name = "admin" };
+        var operatorRole = new Role { Id = Guid.NewGuid(), Name = "operator" };
+
+        _roleRepo
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()))
+            .Returns((Expression<Func<Role, bool>> pred) =>
+            {
+                if(pred.Compile()(adminRole))
+                {
+                    return adminRole;
+                }
+
+                if(pred.Compile()(operatorRole))
+                {
+                    return operatorRole;
+                }
+
+                return null;
+            });
+
+        _userRoleRepo
+            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()))
+            .Returns((UserRole?)null);
+
+        var result = _logic.GetRoleByUserId(userId);
+
+        result.Should().Be("general");
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Exactly(2));
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Exactly(2));
+        _roleRepo.VerifyNoOtherCalls();
+        _userRoleRepo.VerifyNoOtherCalls();
+    }
 }

@@ -142,4 +142,44 @@ public class SessionLogicTest
         _repoSessionMock.Verify(r => r.Delete(It.IsAny<Guid>()), Times.Never);
         _repoSessionMock.VerifyNoOtherCalls();
     }
+
+    [TestMethod]
+    public void CreateSession_ReturnsToken_From_Added_Session()
+    {
+        var user = new User("Ana", "Perez", "ana@x", "p", new DateOnly(2000, 1, 1));
+        var persisted = new Session(user) { Token = Guid.NewGuid() };
+
+        _repoSessionMock
+            .Setup(r => r.Add(It.IsAny<Session>()))
+            .Returns(persisted);
+
+        var result = _logic.CreateSession(user);
+
+        result.Should().Be(persisted.Token);
+        _repoSessionMock.Verify(r => r.Add(It.IsAny<Session>()), Times.Once);
+        _repoSessionMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetUserBySession_ReturnsNull_When_Session_Exists_But_User_Is_Null()
+    {
+        var token = Guid.NewGuid();
+        var user = new User("Ana", "Perez", "ana@x", "p", new DateOnly(2000, 1, 1));
+        var session = new Session(user)
+        {
+            Token = token,
+            User = null,
+            UserId = user.Id
+        };
+
+        _repoSessionMock
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>()))
+            .Returns((Expression<Func<Session, bool>> pred) => pred.Compile()(session) ? session : null);
+
+        var result = _logic.GetUserBySession(token);
+
+        result.Should().BeNull();
+        _repoSessionMock.Verify(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>()), Times.Once);
+        _repoSessionMock.VerifyNoOtherCalls();
+    }
 }
