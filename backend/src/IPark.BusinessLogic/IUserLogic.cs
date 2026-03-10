@@ -9,9 +9,7 @@ public interface IUserLogic
     public bool IsEmailUnique(string email);
     public Guid? Login(string email, string password);
     public void EditProfile(Guid activeUserId, string? name, string? surname, string? email, string? password, DateOnly? dateOfBirth);
-    public void AddPoints(Guid userId, int points);
     public User GetByIdOrThrow(Guid id);
     public int CalculateAge(Guid userId);
     User GetOrThrow(Guid id);
-    public void DeductPoints(Guid userId, int point);
 }

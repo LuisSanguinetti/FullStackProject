@@ -53,6 +53,7 @@ public sealed class UserController : ControllerBase
     [HttpGet("role")]
     public IActionResult GetMyRole([FromHeader(Name = "Authorization")] string? authorization)
     {
+        // faltaria usar sistema var me
         var raw = authorization?.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) == true
             ? authorization.Substring(7).Trim()
             : authorization?.Trim();

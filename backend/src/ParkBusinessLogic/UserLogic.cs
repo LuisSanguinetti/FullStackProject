@@ -130,14 +130,6 @@ public class UserLogic : IUserLogic
         }
     }
 
-    public void AddPoints(Guid userId, int points)
-    {
-        var user = _userRepository.Find(u => u.Id == userId)
-                   ?? throw new KeyNotFoundException($"User with id: {userId} not found");
-        user.Points += points;
-        _userRepository.Update(user);
-    }
-
     public User GetByIdOrThrow(Guid id)
     {
         return _userRepository.Find(u => u.Id == id)
@@ -161,15 +153,6 @@ public class UserLogic : IUserLogic
     {
         return _userRepository.Find(u => u.Id == id)
                ?? throw new KeyNotFoundException($"User with id: {id} not found");
-    }
-
-    public void DeductPoints(Guid userId, int point)
-    {
-        var user = GetByIdOrThrow(userId);
-
-        user.Points = user.Points - point;
-
-        _userRepository.Update(user);
     }
 
     private bool IsEmailUsedByAnother(Guid me, string email)
