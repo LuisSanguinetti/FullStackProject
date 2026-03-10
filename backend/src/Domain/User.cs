@@ -11,7 +11,6 @@ public class User
     public required string Email { get; set; }
     public required string Password { get; set; }
     public DateOnly DateOfBirth { get; set; }
-    public int Points { get; set; }
 
     public User()
     {
@@ -26,6 +25,5 @@ public class User
         Email = email;
         Password = password;
         DateOfBirth = dateOfBirth;
-        Points = 0;
     }
 }

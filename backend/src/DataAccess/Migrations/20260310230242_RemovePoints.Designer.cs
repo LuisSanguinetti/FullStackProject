@@ -4,16 +4,19 @@ using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace DataAccess.Persistence.Migrations
+namespace DataAccess.Migrations
 {
     [DbContext(typeof(ObligatorioDbContext))]
-    partial class ObligatorioDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260310230242_RemovePoints")]
+    partial class RemovePoints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

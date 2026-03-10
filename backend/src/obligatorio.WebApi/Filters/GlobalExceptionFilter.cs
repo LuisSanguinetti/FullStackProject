@@ -15,9 +15,6 @@ public sealed class GlobalExceptionFilter : IExceptionFilter
             // 409
             case DuplicateEmailException:
             case AgeRequirementNotMetException:
-            case AttractionCapacityReachedException:
-            case AttractionDisabledException:
-            case SpecialEventAttractionMismatchException:
                 Write(ctx, new ProblemDetails
                 {
                     Title = "Conflict",

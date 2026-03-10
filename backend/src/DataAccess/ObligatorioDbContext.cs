@@ -26,7 +26,6 @@ public class ObligatorioDbContext : DbContext
             e.Property(x => x.Email).IsRequired();
             e.Property(x => x.Password).IsRequired();
             e.Property(x => x.DateOfBirth).IsRequired();
-            e.Property(x => x.Points).IsRequired();
             e.HasIndex(x => x.Email).IsUnique();
         });
 
