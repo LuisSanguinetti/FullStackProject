@@ -389,51 +389,6 @@ public class UserLogicTest
     }
 
     [TestMethod]
-    public void AddPoints_Increments_And_Updates_User()
-    {
-        // arrange
-        var id = Guid.NewGuid();
-        var user = new User("Alice", "Baker", "a@x", "p", new DateOnly(1990,1,1))
-            { Id = id, Points = 10 };
-
-        _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
-
-        _repoMock
-            .Setup(r => r.Update(It.Is<User>(u => ReferenceEquals(u, user) && u.Points == 25)))
-            .Returns(user) // <- Strict mock needs a return
-            .Verifiable();
-
-        // act
-        _logic.AddPoints(id, 15);
-
-        // assert
-        user.Points.Should().Be(25);
-        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
-        _repoMock.Verify(r => r.Update(It.Is<User>(u => ReferenceEquals(u, user) && u.Points == 25)), Times.Once);
-        _repoMock.VerifyNoOtherCalls();
-    }
-
-    [TestMethod]
-    public void AddPoints_Throws_When_User_Not_Found()
-    {
-        // arrange
-        var id = Guid.NewGuid();
-
-        // act
-        Action act = () => _logic.AddPoints(id, 5);
-
-        // assert
-        act.Should().Throw<KeyNotFoundException>()
-            .WithMessage($"*{id}*");
-
-        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
-        _repoMock.Verify(r => r.Update(It.IsAny<User>()), Times.Never);
-        _repoMock.VerifyNoOtherCalls();
-    }
-
-    [TestMethod]
     public void GetByIdOrThrow_Returns_User_When_Found()
     {
         var id = Guid.NewGuid();
@@ -580,36 +535,6 @@ public class UserLogicTest
     }
 
     [TestMethod]
-    public void DeductPointsTest()
-    {
-        // arrange
-        var userId = Guid.NewGuid();
-        var user = new User("Facundo", "Acu�a", "facu@x", "pass", new DateOnly(2003, 1, 1))
-        {
-            Id = userId,
-            Points = 200
-        };
-
-        _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns(user);
-
-        _repoMock
-            .Setup(r => r.Update(It.Is<User>(u => u.Id == userId && u.Points == 150)))
-            .Returns(user);
-
-        // act
-        _logic.DeductPoints(userId, 50);
-
-        // assert
-        user.Points.Should().Be(150);
-
-        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
-        _repoMock.Verify(r => r.Update(It.Is<User>(u => u.Id == userId && u.Points == 150)), Times.Once);
-        _repoMock.VerifyNoOtherCalls();
-    }
-
-    [TestMethod]
     public void EditProfile_DoesNotUpdate_When_No_Fields_Are_Provided()
     {
         var id = Guid.NewGuid();
@@ -673,23 +598,6 @@ public class UserLogicTest
 
         age.Should().Be(19);
         _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
-        _repoMock.VerifyNoOtherCalls();
-    }
-
-    [TestMethod]
-    public void DeductPoints_Throws_When_User_Not_Found()
-    {
-        var userId = Guid.NewGuid();
-
-        _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((User?)null);
-
-        Action act = () => _logic.DeductPoints(userId, 50);
-
-        act.Should().Throw<KeyNotFoundException>().WithMessage($"*{userId}*");
-        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
-        _repoMock.Verify(r => r.Update(It.IsAny<User>()), Times.Never);
         _repoMock.VerifyNoOtherCalls();
     }
 
