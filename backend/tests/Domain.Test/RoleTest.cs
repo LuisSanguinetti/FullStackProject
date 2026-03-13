@@ -23,7 +23,7 @@ public class RoleTest
     [TestMethod]
     public void Role_DefaultCtor()
     {
-        // Arranges
+        // Arrange
         var id = Guid.NewGuid();
         var name = "Editor";
         var role = new Role();
