@@ -293,22 +293,22 @@ public class UserLogicTest
         var dupe = new User("Someone", "Else", "new@x", "p", new DateOnly(1991,1,1)) { Id = Guid.NewGuid() };
 
         _repoMock
-          .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-          .Returns((Expression<Func<User, bool>> pred) =>
-          {
-              var f = pred.Compile();
-              if(f(user))
-              {
-                  return user;
-              }
+            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) =>
+            {
+                var f = pred.Compile();
+                if(f(user))
+                {
+                    return user;
+                }
 
-              if(f(dupe))
-              {
-                  return dupe;
-              }
+                if(f(dupe))
+                {
+                    return dupe;
+                }
 
-              return null;
-          });
+                return null;
+            });
 
         var me = id;
 
@@ -338,8 +338,8 @@ public class UserLogicTest
             Id = id
         };
 
-        _repoMock.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) =>
+        _repoMock.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) =>
             {
                 var f = pred.Compile();
                 return f(user) ? user : null;
@@ -386,8 +386,8 @@ public class UserLogicTest
         var user = new User("Alice", "Baker", "a@x", "p", new DateOnly(1990,1,1)) { Id = id };
 
         _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
+            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(user) ? user : null);
 
         var result = _logic.GetByIdOrThrow(id);
 
@@ -492,10 +492,9 @@ public class UserLogicTest
         // arrange
         var id = Guid.NewGuid();
         var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1)) { Id = id };
-
         _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
+            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(user) ? user : null);
 
         // act
         var result = _logic.GetOrThrow(id);
@@ -531,8 +530,9 @@ public class UserLogicTest
         var id = Guid.NewGuid();
         var user = new User("Old", "User", "old@x", "oldp", new DateOnly(1990, 1, 1)) { Id = id };
 
-        _repoMock.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
+        _repoMock
+            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(user) ? user : null);
 
         _logic.EditProfile(id, null, null, null, null, null);
 
@@ -553,8 +553,9 @@ public class UserLogicTest
         var id = Guid.NewGuid();
         var user = new User("Old", "User", "old@x", "oldp", new DateOnly(1990, 1, 1)) { Id = id };
 
-        _repoMock.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
+        _repoMock
+            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(user) ? user : null);
         _repoMock.Setup(r => r.Update(It.Is<User>(u => u.Id == id && u.Email == "new@x")))
             .Returns<User>(u => u);
 
@@ -576,8 +577,8 @@ public class UserLogicTest
         var user = new User("Ana", "Perez", "ana@x", "p", birthDate) { Id = userId };
 
         _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
+            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(user) ? user : null);
 
         var age = _logic.CalculateAge(userId);
 
@@ -592,8 +593,8 @@ public class UserLogicTest
         var user = new User("Ana", "Perez", "ana@x", "p", new DateOnly(2000, 1, 1));
 
         _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
+            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(user) ? user : null);
 
         _repoSessionMock
             .Setup(r => r.Add(It.IsAny<Session>()))
@@ -613,8 +614,8 @@ public class UserLogicTest
         var existing = new User("Ana", "Perez", "ana@x", "p", new DateOnly(2000, 1, 1));
 
         _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(existing) ? existing : null);
+            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(existing) ? existing : null);
 
         var result = _logic.IsEmailUnique("  ANA@X  ");
 

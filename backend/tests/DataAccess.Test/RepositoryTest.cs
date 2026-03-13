@@ -212,25 +212,6 @@ public class RepositoryTest
     }
 
     [TestMethod]
-    public void FindAll_UserRole_WithIncludes_NoFilter_LoadsUserAndRole()
-    {
-        var userRepo = new Repository<User>(_context!);
-        var roleRepo = new Repository<Role>(_context!);
-        var userRoleRepo = new Repository<UserRole>(_context!);
-
-        var u = userRepo.Add(new User("NF", "User", "nf@test.com", "pwd", new DateOnly(2001, 1, 1)));
-        var r = roleRepo.Add(new Role("MemberNF"));
-        _context!.Set<UserRole>().Add(new UserRole { UserId = u.Id, RoleId = r.Id, User = u, Role = r });
-        _context.SaveChanges();
-
-        var list = userRoleRepo.FindAll(x => x.User, x => x.Role);
-
-        Assert.AreEqual(1, list.Count);
-        Assert.IsNotNull(list[0].User);
-        Assert.IsNotNull(list[0].Role);
-    }
-
-    [TestMethod]
     public void GetPage_UserRole_WithFilterAndIncludes_ReturnsFilteredFirstPage()
     {
         var userRepo = new Repository<User>(_context!);

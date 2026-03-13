@@ -28,10 +28,10 @@ public class UserRoleLogicTest
         var userId = Guid.NewGuid();
         var role = new Role { Id = Guid.NewGuid(), Name = "Admin" };
 
-        _roleRepo.Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()))
-                 .Returns((Expression<Func<Role, bool>> pred) => pred.Compile()(role) ? role : null);
+        _roleRepo.Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()))
+                 .Returns((Expression<Func<Role, bool>> pred, Expression<Func<Role, object>>[] includes) => pred.Compile()(role) ? role : null);
 
-        _userRoleRepo.Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()))
+        _userRoleRepo.Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()))
                      .Returns((UserRole?)null);
 
         _userRoleRepo.Setup(r => r.Add(It.IsAny<UserRole>()))
@@ -118,12 +118,12 @@ public class UserRoleLogicTest
         var adminRole = new Role { Id = Guid.NewGuid(), Name = "admin" };
 
         _roleRepo
-            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()))
-            .Returns((Expression<Func<Role, bool>> pred) => pred.Compile()(adminRole) ? adminRole : null);
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()))
+            .Returns((Expression<Func<Role, bool>> pred, Expression<Func<Role, object>>[] includes) => pred.Compile()(adminRole) ? adminRole : null);
 
         _userRoleRepo
-            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()))
-            .Returns((Expression<Func<UserRole, bool>> pred) =>
+            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()))
+            .Returns((Expression<Func<UserRole, bool>> pred, Expression<Func<UserRole, object>>[] includes) =>
             {
                 var adminLink = new UserRole { Id = Guid.NewGuid(), UserId = userId, RoleId = adminRole.Id };
                 return pred.Compile()(adminLink) ? adminLink : null;
@@ -132,8 +132,8 @@ public class UserRoleLogicTest
         var result = _logic.GetRoleByUserId(userId);
 
         result.Should().Be("admin");
-        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Once);
-        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Once);
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Once);
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()), Times.Once);
         _roleRepo.VerifyNoOtherCalls();
         _userRoleRepo.VerifyNoOtherCalls();
     }
@@ -145,12 +145,12 @@ public class UserRoleLogicTest
         var operatorRole = new Role { Id = Guid.NewGuid(), Name = "operator" };
 
         _roleRepo
-            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()))
-            .Returns((Expression<Func<Role, bool>> pred) => pred.Compile()(operatorRole) ? operatorRole : null);
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()))
+            .Returns((Expression<Func<Role, bool>> pred, Expression<Func<Role, object>>[] includes) => pred.Compile()(operatorRole) ? operatorRole : null);
 
         _userRoleRepo
-            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()))
-            .Returns((Expression<Func<UserRole, bool>> pred) =>
+            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()))
+            .Returns((Expression<Func<UserRole, bool>> pred, Expression<Func<UserRole, object>>[] includes) =>
             {
                 var operatorLink = new UserRole { Id = Guid.NewGuid(), UserId = userId, RoleId = operatorRole.Id };
                 return pred.Compile()(operatorLink) ? operatorLink : null;
@@ -159,8 +159,8 @@ public class UserRoleLogicTest
         var result = _logic.GetRoleByUserId(userId);
 
         result.Should().Be("operator");
-        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Exactly(2));
-        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Once);
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Exactly(2));
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()), Times.Once);
         _roleRepo.VerifyNoOtherCalls();
         _userRoleRepo.VerifyNoOtherCalls();
     }
@@ -191,8 +191,8 @@ public class UserRoleLogicTest
         var operatorRole = new Role { Id = Guid.NewGuid(), Name = "operator" };
 
         _roleRepo
-            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()))
-            .Returns((Expression<Func<Role, bool>> pred) =>
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()))
+            .Returns((Expression<Func<Role, bool>> pred, Expression<Func<Role, object>>[] includes) =>
             {
                 if(pred.Compile()(adminRole))
                 {
@@ -208,14 +208,14 @@ public class UserRoleLogicTest
             });
 
         _userRoleRepo
-            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()))
+            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()))
             .Returns((UserRole?)null);
 
         var result = _logic.GetRoleByUserId(userId);
 
         result.Should().Be("general");
-        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Exactly(2));
-        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Exactly(2));
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Exactly(2));
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()), Times.Exactly(2));
         _roleRepo.VerifyNoOtherCalls();
         _userRoleRepo.VerifyNoOtherCalls();
     }
