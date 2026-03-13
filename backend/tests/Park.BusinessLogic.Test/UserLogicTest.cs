@@ -268,8 +268,7 @@ public class UserLogicTest
     {
         // arrange
         var me = Guid.NewGuid();
-        var repo = new Mock<IRepository<User>>(MockBehavior.Strict);
-        repo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
+        _repoMock.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
             .Returns((User?)null);
 
         var id = Guid.NewGuid();
@@ -281,8 +280,8 @@ public class UserLogicTest
         // assert
         act.Should().Throw<KeyNotFoundException>()
             .WithMessage("*not found*");
-        repo.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.AtLeastOnce);
-        repo.VerifyNoOtherCalls();
+        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.AtLeastOnce);
+        _repoMock.VerifyNoOtherCalls();
     }
 
     [TestMethod]
@@ -293,23 +292,23 @@ public class UserLogicTest
         var user = new User("Old", "User", "old@x", "oldp", new DateOnly(1990,1,1)) { Id = id };
         var dupe = new User("Someone", "Else", "new@x", "p", new DateOnly(1991,1,1)) { Id = Guid.NewGuid() };
 
-        var repo = new Mock<IRepository<User>>(MockBehavior.Strict);
-        repo.Setup(r => r.Find(It.IsAny<Expression<Func<User,bool>>>()))
-            .Returns((Expression<Func<User,bool>> pred) =>
-            {
-                var f = pred.Compile();
-                if (f(user))
-                {
-                    return user;
-                }
+        _repoMock
+          .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
+          .Returns((Expression<Func<User, bool>> pred) =>
+          {
+              var f = pred.Compile();
+              if(f(user))
+              {
+                  return user;
+              }
 
-                if (f(dupe))
-                {
-                    return dupe;
-                }
+              if(f(dupe))
+              {
+                  return dupe;
+              }
 
-                return null;
-            });
+              return null;
+          });
 
         var me = id;
 
@@ -325,8 +324,8 @@ public class UserLogicTest
         // assert
         act.Should().Throw<DuplicateEmailException>();
         user.Email.Should().Be("old@x");
-        repo.Verify(r => r.Find(It.IsAny<Expression<Func<User,bool>>>()), Times.AtLeastOnce);
-        repo.VerifyNoOtherCalls();
+        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User,bool>>>()), Times.AtLeastOnce);
+        _repoMock.VerifyNoOtherCalls();
     }
 
     [TestMethod]
@@ -339,16 +338,14 @@ public class UserLogicTest
             Id = id
         };
 
-        var repo = new Mock<IRepository<User>>(MockBehavior.Strict);
-
-        repo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
+        _repoMock.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
             .Returns((Expression<Func<User, bool>> pred) =>
             {
                 var f = pred.Compile();
                 return f(user) ? user : null;
             });
 
-        repo.Setup(r => r.Update(It.Is<User>(u => u.Id == user.Id)))
+        _repoMock.Setup(r => r.Update(It.Is<User>(u => u.Id == user.Id)))
             .Returns((User u) => u);
 
         var me = id;
@@ -369,19 +366,17 @@ public class UserLogicTest
         user.Password.Should().Be("newp");
         user.DateOfBirth.Should().Be(new DateOnly(2000, 2, 2));
 
-        repo.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Exactly(2));
-        repo.Verify(r => r.Update(It.Is<User>(u => u.Id == user.Id)), Times.Once);
+        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Exactly(2));
+        _repoMock.Verify(r => r.Update(It.Is<User>(u => u.Id == user.Id)), Times.Once);
     }
 
     [TestMethod]
     public void EditProfile_ThrowsInvalidCredentials_WhenUserIdIsEmpty()
     {
-        var repo = new Mock<IRepository<User>>(MockBehavior.Strict);
-
         Action act = () => _logic.EditProfile(Guid.Empty, null, null, null, null, null);
 
         act.Should().Throw<InvalidCredentialsException>();
-        repo.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Never);
+        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Never);
     }
 
     [TestMethod]
@@ -536,8 +531,7 @@ public class UserLogicTest
         var id = Guid.NewGuid();
         var user = new User("Old", "User", "old@x", "oldp", new DateOnly(1990, 1, 1)) { Id = id };
 
-        var repo = new Mock<IRepository<User>>(MockBehavior.Strict);
-        repo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
+        _repoMock.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
             .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
 
         _logic.EditProfile(id, null, null, null, null, null);
@@ -548,9 +542,9 @@ public class UserLogicTest
         user.Password.Should().Be("oldp");
         user.DateOfBirth.Should().Be(new DateOnly(1990, 1, 1));
 
-        repo.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
-        repo.Verify(r => r.Update(It.IsAny<User>()), Times.Never);
-        repo.VerifyNoOtherCalls();
+        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
+        _repoMock.Verify(r => r.Update(It.IsAny<User>()), Times.Never);
+        _repoMock.VerifyNoOtherCalls();
     }
 
     [TestMethod]
@@ -559,18 +553,17 @@ public class UserLogicTest
         var id = Guid.NewGuid();
         var user = new User("Old", "User", "old@x", "oldp", new DateOnly(1990, 1, 1)) { Id = id };
 
-        var repo = new Mock<IRepository<User>>(MockBehavior.Strict);
-        repo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
+        _repoMock.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
             .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
-        repo.Setup(r => r.Update(It.Is<User>(u => u.Id == id && u.Email == "new@x")))
+        _repoMock.Setup(r => r.Update(It.Is<User>(u => u.Id == id && u.Email == "new@x")))
             .Returns<User>(u => u);
 
         _logic.EditProfile(id, null, null, "  new@x  ", null, null);
 
         user.Email.Should().Be("new@x");
-        repo.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Exactly(2));
-        repo.Verify(r => r.Update(It.Is<User>(u => u.Id == id && u.Email == "new@x")), Times.Once);
-        repo.VerifyNoOtherCalls();
+        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Exactly(2));
+        _repoMock.Verify(r => r.Update(It.Is<User>(u => u.Id == id && u.Email == "new@x")), Times.Once);
+        _repoMock.VerifyNoOtherCalls();
     }
 
     [TestMethod]
