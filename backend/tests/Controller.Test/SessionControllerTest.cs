@@ -3,6 +3,7 @@ using IParkBusinessLogic;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using obligatorio.WebApi.Controllers;
+using obligatorio.WebApi.DTO;
 
 namespace Controller.Test;
 [TestClass]
@@ -61,6 +62,50 @@ public class SessionControllerTest
         }
 
         _sessionLogicMock.Verify(s => s.DeleteSession(token), Times.Once);
+        _sessionLogicMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void LogIn_Returns200_WithToken()
+    {
+        // Arrange
+        var expected = Guid.NewGuid();
+        var dto = new UserLogInDto { Email = "alice@ex.com", Password = "secret!" };
+
+        _sessionLogicMock
+            .Setup(l => l.Login("alice@ex.com", "secret!"))
+            .Returns(expected);
+
+        // Act
+        var action = _controller.Login(dto);
+
+        // Assert
+        var result = action as OkObjectResult;
+        result.Should().NotBeNull();
+        result!.StatusCode.Should().Be(200);
+        result.Value.Should().BeEquivalentTo(new { token = expected });
+
+        _sessionLogicMock.Verify(l => l.Login("alice@ex.com", "secret!"), Times.Once);
+    }
+
+    [TestMethod]
+    public void LogIn_PropagatesException_WhenCredentialsInvalid()
+    {
+        // Arrange
+        var dto = new UserLogInDto { Email = "bad@ex.com", Password = "nope" };
+
+        _sessionLogicMock
+            .Setup(l => l.Login("bad@ex.com", "nope"))
+            .Throws(new InvalidOperationException("Email or password is incorrect."));
+
+        // Act
+        Action act = () => _controller.Login(dto);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("Email or password is incorrect.");
+
+        _sessionLogicMock.Verify(l => l.Login("bad@ex.com", "nope"), Times.Once);
         _sessionLogicMock.VerifyNoOtherCalls();
     }
 }

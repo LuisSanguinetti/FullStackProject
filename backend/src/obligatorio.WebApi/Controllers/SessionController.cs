@@ -1,5 +1,6 @@
 using IParkBusinessLogic;
 using Microsoft.AspNetCore.Mvc;
+using obligatorio.WebApi.DTO;
 
 namespace obligatorio.WebApi.Controllers;
 
@@ -28,5 +29,12 @@ public class SessionController : ControllerBase
         }
 
         return Ok(new { message = "logged out" });
+    }
+
+    [HttpPost("login")]
+    public IActionResult Login([FromBody] UserLogInDto dto)
+    {
+        var token = _logic.Login(dto.Email, dto.Password);
+        return Ok(new { token });
     }
 }
