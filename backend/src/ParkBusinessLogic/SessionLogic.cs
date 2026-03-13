@@ -1,16 +1,19 @@
 using Domain;
 using IDataAccess;
 using IParkBusinessLogic;
+using Park.BusinessLogic.Exceptions;
 
 namespace Park.BusinessLogic;
 
 public class SessionLogic : ISessionLogic
 {
     private readonly IRepository<Session> _sessionRepository;
+    private readonly IUserLogic _userLogic;
 
-    public SessionLogic(IRepository<Session> sessionRepository)
+    public SessionLogic(IRepository<Session> sessionRepository, IUserLogic userLogic)
     {
         _sessionRepository = sessionRepository;
+        _userLogic = userLogic;
     }
 
     public Guid CreateSession(User user)
@@ -34,5 +37,19 @@ public class SessionLogic : ISessionLogic
     {
         var session = _sessionRepository.Find(s => s.Token == token);
         return session?.User;
+    }
+
+    public Guid? Login(string email, string password)
+    {
+        var normalized = email.Trim().ToLower();
+        if(string.IsNullOrWhiteSpace(normalized) || string.IsNullOrWhiteSpace(password))
+        {
+            throw new InvalidCredentialsException();
+        }
+
+        var existing = _userLogic.CheckCredential(normalized, password);
+
+        var token = CreateSession(existing);
+        return token;
     }
 }

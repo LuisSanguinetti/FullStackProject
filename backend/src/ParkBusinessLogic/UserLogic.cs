@@ -8,12 +8,10 @@ namespace Park.BusinessLogic;
 public class UserLogic : IUserLogic
 {
     private readonly IRepository<User> _userRepository;
-    private readonly ISessionLogic _sessionLogic;
 
-    public UserLogic(IRepository<User> userRepository, ISessionLogic sessionLogic)
+    public UserLogic(IRepository<User> userRepository)
     {
         _userRepository = userRepository;
-        _sessionLogic = sessionLogic;
     }
 
     public IEnumerable<User> GetUsersPage(int page, int pageSize)
@@ -50,24 +48,6 @@ public class UserLogic : IUserLogic
         }
 
         _userRepository.Add(user);
-    }
-
-    public Guid? Login(string email, string password)
-    {
-        var normalized = email.Trim().ToLower();
-        if (string.IsNullOrWhiteSpace(normalized) || string.IsNullOrWhiteSpace(password))
-        {
-            throw new InvalidCredentialsException();
-        }
-
-        var existing = _userRepository.Find(u => u.Email.ToLower() == normalized && u.Password == password);
-        if (existing is null)
-        {
-            throw new InvalidCredentialsException();
-        }
-
-        var token = _sessionLogic.CreateSession(existing);
-        return token;
     }
 
     public bool IsEmailUnique(string email)
@@ -156,5 +136,24 @@ public class UserLogic : IUserLogic
     }
 
     private bool IsEmailUsedByAnother(Guid me, string email)
-        => _userRepository.Find(u => u.Email == email && u.Id != me) is not null;
+    {
+        return _userRepository.Find(u => u.Email == email && u.Id != me) is not null;
+    }
+
+    public User CheckCredential(string email, string password)
+    {
+        var normalized = email.Trim().ToLower();
+        if(string.IsNullOrWhiteSpace(normalized) || string.IsNullOrWhiteSpace(password))
+        {
+            throw new InvalidCredentialsException();
+        }
+
+        var existing = _userRepository.Find(u => u.Email.ToLower() == normalized && u.Password == password);
+        if(existing is null)
+        {
+            throw new InvalidCredentialsException();
+        }
+
+        return existing;
+    }
 }

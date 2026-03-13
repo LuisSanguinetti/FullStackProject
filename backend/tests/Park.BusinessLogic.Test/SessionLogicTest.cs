@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Domain;
 using FluentAssertions;
 using IDataAccess;
+using IParkBusinessLogic;
 using Moq;
 
 namespace Park.BusinessLogic.Test;
@@ -10,13 +11,15 @@ namespace Park.BusinessLogic.Test;
 public class SessionLogicTest
 {
     private Mock<IRepository<Session>> _repoSessionMock = null!;
+    private Mock<IUserLogic> _userLogicMock = null!;
     private SessionLogic _logic = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _repoSessionMock = new Mock<IRepository<Session>>(MockBehavior.Strict);
-        _logic = new SessionLogic(_repoSessionMock.Object);
+        _userLogicMock = new Mock<IUserLogic>(MockBehavior.Strict);
+        _logic = new SessionLogic(_repoSessionMock.Object, _userLogicMock.Object);
     }
 
     [TestMethod]

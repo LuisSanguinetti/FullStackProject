@@ -18,6 +18,7 @@ public sealed class UserController : ControllerBase
         _sessionLogic = sessionLogic;
     }
 
+    [Auth]
     [HttpGet]
     public IEnumerable<UserGetDto> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
@@ -33,13 +34,6 @@ public sealed class UserController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("login")]
-    public IActionResult LogIn([FromBody] UserLogInDto dto)
-    {
-        var token = _userLogic.Login(dto.Email, dto.Password);
-        return Ok(new { token });
-    }
-
     [Auth]
     [HttpPut]
     public IActionResult Update([FromBody] UserUpdateDto dto)
@@ -50,6 +44,7 @@ public sealed class UserController : ControllerBase
         return Ok(new { message = "user updated" });
     }
 
+    [Auth]
     [HttpGet("role")]
     public IActionResult GetMyRole([FromHeader(Name = "Authorization")] string? authorization)
     {

@@ -11,6 +11,7 @@ public class UserAdminController : ControllerBase
     private readonly IUserAdminLogic _logic;
     public UserAdminController(IUserAdminLogic logic) => _logic = logic;
 
+    [Auth(RoleRequired = "admin")]
     [HttpPost("admins")]
     public IActionResult CreateAdmin([FromBody] AdminCreateDto dto)
     {
@@ -18,6 +19,7 @@ public class UserAdminController : ControllerBase
         return CreatedAtAction(nameof(CreateAdmin), new { id = u.Id }, new UserGetDtos(u.Id, u.Name, u.Surname, u.Email, "Admin"));
     }
 
+    [Auth(RoleRequired = "admin")]
     [HttpPost("operators")]
     public IActionResult CreateOperator([FromBody] OperatorCreateDto dto)
     {
@@ -25,6 +27,7 @@ public class UserAdminController : ControllerBase
         return CreatedAtAction(nameof(CreateOperator), new { id = u.Id }, new UserGetDtos(u.Id, u.Name, u.Surname, u.Email, "Operator"));
     }
 
+    [Auth(RoleRequired = "admin")]
     [HttpPost("visitors")]
     public IActionResult CreateVisitor([FromBody] VisitorCreateDto dto)
     {
@@ -32,6 +35,7 @@ public class UserAdminController : ControllerBase
         return CreatedAtAction(nameof(CreateVisitor), new { id = u.Id }, new UserGetDtos(u.Id, u.Name, u.Surname, u.Email, "Visitor"));
     }
 
+    [Auth(RoleRequired = "admin")]
     [HttpDelete("{id:guid}")]
     public IActionResult Delete(Guid id)
     {
