@@ -214,8 +214,8 @@ public class UserAdminLogicTest
         var id = Guid.NewGuid();
         var user = new User("Juan", "Perez", "a@x", "p", new DateOnly(2000, 1, 1)) { Id = id };
 
-        _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
+        _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(user) ? user : null);
         _userRepo.Setup(r => r.Delete(id));
 
         _logic.Delete(id);
@@ -250,8 +250,8 @@ public class UserAdminLogicTest
         var id = Guid.NewGuid();
         var user = new User("Juan", "Perez", "a@x", "p", new DateOnly(2000, 1, 1)) { Id = id };
 
-        _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((Expression<Func<User, bool>> pred) => pred.Compile()(user) ? user : null);
+        _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
+            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(user) ? user : null);
 
         var result = _logic.GetByIdOrThrow(id);
 

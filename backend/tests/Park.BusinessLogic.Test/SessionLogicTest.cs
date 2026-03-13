@@ -104,13 +104,13 @@ public class SessionLogicTest
         var session = new Session(user) { Token = token, User = user, UserId = user.Id };
 
         _repoSessionMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>()))
-            .Returns((Expression<Func<Session, bool>> pred) => pred.Compile()(session) ? session : null);
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>(), It.IsAny<Expression<Func<Session, object>>[]>()))
+            .Returns((Expression<Func<Session, bool>> pred, Expression<Func<Session, object>>[] includes) => pred.Compile()(session) ? session : null);
 
         var result = _logic.GetUserBySession(token);
 
         result.Should().BeSameAs(user);
-        _repoSessionMock.Verify(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>()), Times.Once);
+        _repoSessionMock.Verify(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>(), It.IsAny<Expression<Func<Session, object>>[]>()), Times.Once);
     }
 
     [TestMethod]
@@ -176,13 +176,13 @@ public class SessionLogicTest
         };
 
         _repoSessionMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>()))
-            .Returns((Expression<Func<Session, bool>> pred) => pred.Compile()(session) ? session : null);
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>(), It.IsAny<Expression<Func<Session, object>>[]>()))
+            .Returns((Expression<Func<Session, bool>> pred, Expression<Func<Session, object>>[] includes) => pred.Compile()(session) ? session : null);
 
         var result = _logic.GetUserBySession(token);
 
         result.Should().BeNull();
-        _repoSessionMock.Verify(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>()), Times.Once);
+        _repoSessionMock.Verify(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>(), It.IsAny<Expression<Func<Session, object>>[]>()), Times.Once);
         _repoSessionMock.VerifyNoOtherCalls();
     }
 }
