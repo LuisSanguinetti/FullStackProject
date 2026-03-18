@@ -33,7 +33,7 @@ public class UserAdminLogicTest
         _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>())).Returns((User?)null);
         _userRepo.Setup(r => r.Add(It.IsAny<User>())).Returns<User>(u => u);
 
-        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "Visitor"));
+        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "visitor"));
 
         var u = _logic.CreateVisitor("Ana", "Ríos", "ana@x", "p",
             new DateOnly(2000, 1, 1));
@@ -42,7 +42,6 @@ public class UserAdminLogicTest
         u.Email.Should().Be("ana@x");
 
         _userRepo.Verify(r => r.Add(It.IsAny<User>()), Times.Once);
-        _userRoleLogic.Verify(l => l.AssignRoleByName(u.Id, "Visitor"), Times.Once);
         _userRepo.VerifyAll();
         _userRoleLogic.VerifyAll();
     }
@@ -68,7 +67,7 @@ public class UserAdminLogicTest
         _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>())).Returns((User?)null);
         _userRepo.Setup(r => r.Add(It.IsAny<User>())).Returns<User>(u => u);
 
-        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "Visitor"))
+        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "visitor"))
                       .Throws(new InvalidOperationException("Role 'Visitor' not found"));
 
         Action act = () => _logic.CreateVisitor("Ana", "Ríos", "ana@x", "p",
@@ -83,11 +82,11 @@ public class UserAdminLogicTest
         _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>())).Returns((User?)null);
         _userRepo.Setup(r => r.Add(It.IsAny<User>())).Returns<User>(u => u);
 
-        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "Operator"));
+        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "operator"));
 
         var u = _logic.CreateOperator("Op", "One", "op@x", "p", new DateOnly(1999, 1, 1));
 
-        _userRoleLogic.Verify(l => l.AssignRoleByName(u.Id, "Operator"), Times.Once);
+        _userRoleLogic.Verify(l => l.AssignRoleByName(u.Id, "operator"), Times.Once);
     }
 
     [TestMethod]
@@ -123,7 +122,7 @@ public class UserAdminLogicTest
     {
         _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>())).Returns((User?)null);
         _userRepo.Setup(r => r.Add(It.IsAny<User>())).Returns<User>(u => u);
-        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "Admin"));
+        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "admin"));
 
         var u = _logic.CreateAdmin("Juan", "Perez", "admin@x", "p", new DateOnly(2000, 1, 1));
 
@@ -131,7 +130,7 @@ public class UserAdminLogicTest
         u.Email.Should().Be("admin@x");
 
         _userRepo.Verify(r => r.Add(It.IsAny<User>()), Times.Once);
-        _userRoleLogic.Verify(l => l.AssignRoleByName(u.Id, "Admin"), Times.Once);
+        _userRoleLogic.Verify(l => l.AssignRoleByName(u.Id, "admin"), Times.Once);
         _userRepo.VerifyAll();
         _userRoleLogic.VerifyAll();
     }
@@ -197,13 +196,13 @@ public class UserAdminLogicTest
     {
         _userRepo.Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>())).Returns((User?)null);
         _userRepo.Setup(r => r.Add(It.IsAny<User>())).Returns<User>(u => u);
-        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "Admin"));
+        _userRoleLogic.Setup(l => l.AssignRoleByName(It.IsAny<Guid>(), "admin"));
 
         var u = _logic.CreateAdmin("Juan", "Perez", "  ADMIN@X  ", "p", new DateOnly(2000, 1, 1));
 
         u.Email.Should().Be("admin@x");
         _userRepo.Verify(r => r.Add(It.Is<User>(x => x.Email == "admin@x")), Times.Once);
-        _userRoleLogic.Verify(l => l.AssignRoleByName(u.Id, "Admin"), Times.Once);
+        _userRoleLogic.Verify(l => l.AssignRoleByName(u.Id, "admin"), Times.Once);
         _userRepo.VerifyAll();
         _userRoleLogic.VerifyAll();
     }

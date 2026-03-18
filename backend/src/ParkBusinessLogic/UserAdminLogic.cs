@@ -10,9 +10,9 @@ public class UserAdminLogic : IUserAdminLogic
     private readonly IRepository<User> _userRepo;
     private readonly IUserRoleLogic _userRoleLogic;
 
-    private const string RoleAdmin = "Admin";
-    private const string RoleOperator = "Operator";
-    private const string RoleVisitor = "Visitor";
+    private const string RoleAdmin = "admin";
+    private const string RoleOperator = "operator";
+    private const string RoleVisitor = "visitor";
 
     public UserAdminLogic(IRepository<User> userRepo, IUserRoleLogic userRoleLogic)
     {

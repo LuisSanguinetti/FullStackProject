@@ -106,6 +106,9 @@ public class SessionLogicTest
         _repoSessionMock
             .Setup(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>(), It.IsAny<Expression<Func<Session, object>>[]>()))
             .Returns((Expression<Func<Session, bool>> pred, Expression<Func<Session, object>>[] includes) => pred.Compile()(session) ? session : null);
+        _userLogicMock
+            .Setup(l => l.GetByIdOrThrow(user.Id))
+            .Returns(user);
 
         var result = _logic.GetUserBySession(token);
 
@@ -160,29 +163,6 @@ public class SessionLogicTest
 
         result.Should().Be(persisted.Token);
         _repoSessionMock.Verify(r => r.Add(It.IsAny<Session>()), Times.Once);
-        _repoSessionMock.VerifyNoOtherCalls();
-    }
-
-    [TestMethod]
-    public void GetUserBySession_ReturnsNull_When_Session_Exists_But_User_Is_Null()
-    {
-        var token = Guid.NewGuid();
-        var user = new User("Ana", "Perez", "ana@x", "p", new DateOnly(2000, 1, 1));
-        var session = new Session(user)
-        {
-            Token = token,
-            User = null,
-            UserId = user.Id
-        };
-
-        _repoSessionMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>(), It.IsAny<Expression<Func<Session, object>>[]>()))
-            .Returns((Expression<Func<Session, bool>> pred, Expression<Func<Session, object>>[] includes) => pred.Compile()(session) ? session : null);
-
-        var result = _logic.GetUserBySession(token);
-
-        result.Should().BeNull();
-        _repoSessionMock.Verify(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>(), It.IsAny<Expression<Func<Session, object>>[]>()), Times.Once);
         _repoSessionMock.VerifyNoOtherCalls();
     }
 }

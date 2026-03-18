@@ -7,11 +7,14 @@ namespace Park.BusinessLogic;
 
 public class UserLogic : IUserLogic
 {
+    private const string RoleVisitor = "visitor";
     private readonly IRepository<User> _userRepository;
+    private readonly IUserRoleLogic _userRoleLogic;
 
-    public UserLogic(IRepository<User> userRepository)
+    public UserLogic(IRepository<User> userRepository, IUserRoleLogic userRoleLogic)
     {
         _userRepository = userRepository;
+        _userRoleLogic = userRoleLogic;
     }
 
     public IEnumerable<User> GetUsersPage(int page, int pageSize)
@@ -48,6 +51,7 @@ public class UserLogic : IUserLogic
         }
 
         _userRepository.Add(user);
+        _userRoleLogic.AssignRoleByName(user.Id, RoleVisitor);
     }
 
     public bool IsEmailUnique(string email)
@@ -127,12 +131,6 @@ public class UserLogic : IUserLogic
         }
 
         return age;
-    }
-
-    public User GetOrThrow(Guid id)
-    {
-        return _userRepository.Find(u => u.Id == id)
-               ?? throw new KeyNotFoundException($"User with id: {id} not found");
     }
 
     private bool IsEmailUsedByAnother(Guid me, string email)
