@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace DataAccess.Persistence.Migrations
+namespace DataAccess.Migrations
 {
     [DbContext(typeof(ObligatorioDbContext))]
     partial class ObligatorioDbContextModelSnapshot : ModelSnapshot

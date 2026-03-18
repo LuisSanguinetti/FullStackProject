@@ -46,6 +46,12 @@ public class UserRoleLogic : IUserRoleLogic
             return "general";
         }
 
+        var visitor = _roleRepo.Find(r => r.Name == "visitor");
+        if(visitor != null && _userRoleRepo.Find(ur => ur.UserId == userId && ur.RoleId == visitor.Id) != null)
+        {
+            return "visitor";
+        }
+
         var admin = _roleRepo.Find(r => r.Name == "admin");
         if (admin != null && _userRoleRepo.Find(ur => ur.UserId == userId && ur.RoleId == admin.Id) != null)
         {
