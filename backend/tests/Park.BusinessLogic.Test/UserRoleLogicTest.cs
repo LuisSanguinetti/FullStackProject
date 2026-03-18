@@ -132,7 +132,7 @@ public class UserRoleLogicTest
         var result = _logic.GetRoleByUserId(userId);
 
         result.Should().Be("admin");
-        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Once);
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Exactly(2));
         _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()), Times.Once);
         _roleRepo.VerifyNoOtherCalls();
         _userRoleRepo.VerifyNoOtherCalls();
@@ -159,7 +159,35 @@ public class UserRoleLogicTest
         var result = _logic.GetRoleByUserId(userId);
 
         result.Should().Be("operator");
-        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Exactly(2));
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Exactly(3));
+        _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()), Times.Once);
+        _roleRepo.VerifyNoOtherCalls();
+        _userRoleRepo.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void GetRoleByUserId_ReturnsVisitor_When_User_Has_Visitor_Role()
+    {
+        var userId = Guid.NewGuid();
+        var visitorRole = new Role { Id = Guid.NewGuid(), Name = "visitor" };
+
+        _roleRepo
+            .Setup(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()))
+            .Returns((Expression<Func<Role, bool>> pred, Expression<Func<Role, object>>[] includes) =>
+                pred.Compile()(visitorRole) ? visitorRole : null);
+
+        _userRoleRepo
+            .Setup(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()))
+            .Returns((Expression<Func<UserRole, bool>> pred, Expression<Func<UserRole, object>>[] includes) =>
+            {
+                var visitorLink = new UserRole { Id = Guid.NewGuid(), UserId = userId, RoleId = visitorRole.Id };
+                return pred.Compile()(visitorLink) ? visitorLink : null;
+            });
+
+        var result = _logic.GetRoleByUserId(userId);
+
+        result.Should().Be("visitor");
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Once);
         _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()), Times.Once);
         _roleRepo.VerifyNoOtherCalls();
         _userRoleRepo.VerifyNoOtherCalls();
@@ -177,7 +205,7 @@ public class UserRoleLogicTest
         var result = _logic.GetRoleByUserId(userId);
 
         result.Should().Be("general");
-        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Exactly(2));
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>()), Times.Exactly(3));
         _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>()), Times.Never);
         _roleRepo.VerifyNoOtherCalls();
         _userRoleRepo.VerifyNoOtherCalls();
@@ -214,7 +242,7 @@ public class UserRoleLogicTest
         var result = _logic.GetRoleByUserId(userId);
 
         result.Should().Be("general");
-        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Exactly(2));
+        _roleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<Role, bool>>>(), It.IsAny<Expression<Func<Role, object>>[]>()), Times.Exactly(3));
         _userRoleRepo.Verify(r => r.Find(It.IsAny<Expression<Func<UserRole, bool>>>(), It.IsAny<Expression<Func<UserRole, object>>[]>()), Times.Exactly(2));
         _roleRepo.VerifyNoOtherCalls();
         _userRoleRepo.VerifyNoOtherCalls();
