@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Domain;
 using FluentAssertions;
 using IDataAccess;
+using IParkBusinessLogic;
 using Moq;
 using Park.BusinessLogic.Exceptions;
 
@@ -14,12 +15,14 @@ public class UserLogicTest
     private Mock<IRepository<Session>> _repoSessionMock = null!;
     private UserLogic _logic = null!;
     private SessionLogic _sessionLogic = null!;
+    private Mock<IUserRoleLogic> _userRoleLogicMock = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _repoMock = new Mock<IRepository<User>>(MockBehavior.Strict);
         _repoSessionMock = new Mock<IRepository<Session>>(MockBehavior.Strict);
+        _userRoleLogicMock = new Mock<IUserRoleLogic>(MockBehavior.Strict);
 
         _repoMock
             .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
@@ -28,7 +31,7 @@ public class UserLogicTest
             .Setup(r => r.Find(It.IsAny<Expression<Func<Session, bool>>>()))
             .Returns((Session?)null);
 
-        _logic = new UserLogic(_repoMock.Object);
+        _logic = new UserLogic(_repoMock.Object, _userRoleLogicMock.Object);
         _sessionLogic = new SessionLogic(_repoSessionMock.Object, _logic);
     }
 
@@ -162,6 +165,9 @@ public class UserLogicTest
         // arrange
         var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1));
 
+        _userRoleLogicMock
+            .Setup(l => l.AssignRoleByName(user.Id, "visitor"));
+
         _repoMock
             .Setup(r => r.Add(It.Is<User>(u =>
                 u.Name == "Alice" &&
@@ -185,6 +191,9 @@ public class UserLogicTest
         // arrange
         var user = new User("Bob", "Carson", "bob@x", "p", new DateOnly(1991, 2, 2));
 
+        _userRoleLogicMock
+            .Setup(l => l.AssignRoleByName(user.Id, "visitor"));
+
         _repoMock
             .Setup(r => r.Add(It.Is<User>(u => ReferenceEquals(u, user))))
             .Returns(user)
@@ -206,6 +215,8 @@ public class UserLogicTest
             .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
             .Returns(existing);
 
+        _userRoleLogicMock
+            .Setup(l => l.AssignRoleByName(existing.Id, "visitor"));
         var newUser = new User("New", "User", "dup@x", "p", new DateOnly(1995,5,5));
 
         // act
@@ -484,44 +495,6 @@ public class UserLogicTest
 
         // Assert
         Assert.AreEqual(expectedAge, age);
-    }
-
-    [TestMethod]
-    public void GetOrThrow_Returns_User_When_Found()
-    {
-        // arrange
-        var id = Guid.NewGuid();
-        var user = new User("Alice", "Baker", "alice@x", "p", new DateOnly(1990, 1, 1)) { Id = id };
-        _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<Expression<Func<User, object>>[]>()))
-            .Returns((Expression<Func<User, bool>> pred, Expression<Func<User, object>>[] includes) => pred.Compile()(user) ? user : null);
-
-        // act
-        var result = _logic.GetOrThrow(id);
-
-        // assert
-        result.Should().BeSameAs(user);
-        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
-        _repoMock.VerifyNoOtherCalls();
-    }
-
-    [TestMethod]
-    public void GetOrThrow_Throws_When_NotFound()
-    {
-        // arrange
-        var id = Guid.NewGuid();
-        _repoMock
-            .Setup(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()))
-            .Returns((User?)null);
-
-        // act
-        Action act = () => _logic.GetOrThrow(id);
-
-        // assert
-        act.Should().Throw<KeyNotFoundException>()
-            .WithMessage($"*{id}*");
-        _repoMock.Verify(r => r.Find(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
-        _repoMock.VerifyNoOtherCalls();
     }
 
     [TestMethod]

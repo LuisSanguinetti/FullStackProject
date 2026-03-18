@@ -36,7 +36,12 @@ public class SessionLogic : ISessionLogic
     public User? GetUserBySession(Guid token)
     {
         var session = _sessionRepository.Find(s => s.Token == token);
-        return session?.User;
+        if(session is null)
+        {
+            return null;
+        }
+
+        return _userLogic.GetByIdOrThrow(session.UserId);
     }
 
     public Guid? Login(string email, string password)

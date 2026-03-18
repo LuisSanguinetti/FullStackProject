@@ -10,6 +10,5 @@ public interface IUserLogic
     public void EditProfile(Guid activeUserId, string? name, string? surname, string? email, string? password, DateOnly? dateOfBirth);
     public User GetByIdOrThrow(Guid id);
     public int CalculateAge(Guid userId);
-    User GetOrThrow(Guid id);
     public User CheckCredential(string email, string password);
 }

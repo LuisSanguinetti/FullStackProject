@@ -7,15 +7,14 @@ namespace obligatorio.WebApi.Controllers;
 [Route("api/v1/users")]
 public sealed class UserController : ControllerBase
 {
+    // pasar a solo una logica por controller
     private readonly IUserLogic _userLogic;
     private readonly IUserRoleLogic _userRoleLogic;
-    private readonly ISessionLogic _sessionLogic;
 
-    public UserController(IUserLogic userLogic, IUserRoleLogic userRoleLogic, ISessionLogic sessionLogic)
+    public UserController(IUserLogic userLogic, IUserRoleLogic userRoleLogic)
     {
         _userLogic = userLogic;
         _userRoleLogic = userRoleLogic;
-        _sessionLogic = sessionLogic;
     }
 
     [Auth]
@@ -38,7 +37,6 @@ public sealed class UserController : ControllerBase
     [HttpPut]
     public IActionResult Update([FromBody] UserUpdateDto dto)
     {
-        // gets the id of the active user
         var me = (HttpContext.Items.TryGetValue("CurrentUserId", out var v) && v is Guid g) ? g : Guid.Empty;
         _userLogic.EditProfile(me, dto.Name, dto.Surname, dto.Email, dto.Password, dto.DateOfBirth);
         return Ok(new { message = "user updated" });
@@ -46,27 +44,19 @@ public sealed class UserController : ControllerBase
 
     [Auth]
     [HttpGet("role")]
-    public IActionResult GetMyRole([FromHeader(Name = "Authorization")] string? authorization)
+    public IActionResult GetMyRole()
     {
-        // faltaria usar sistema var me
-        var raw = authorization?.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) == true
-            ? authorization.Substring(7).Trim()
-            : authorization?.Trim();
+        var me = (HttpContext.Items.TryGetValue("CurrentUserId", out var v) && v is Guid g) ? g : Guid.Empty;
 
-        if (!Guid.TryParse(raw, out var token))
-        {
-            return Ok(new { role = "general" });
-        }
-
-        var user = _sessionLogic.GetUserBySession(token);
-        var role = user is null ? "general" : _userRoleLogic.GetRoleByUserId(user.Id);
+        var role = _userRoleLogic.GetRoleByUserId(me);
         return Ok(new { role });
     }
 
+     [Auth]
      [HttpGet("user")]
      public IActionResult GetUserId([FromQuery] Guid id)
     {
         var user = _userLogic.GetByIdOrThrow(id);
-        return Ok(user);
+        return Ok(UserGetDto.DomToDto(user));
     }
 }
