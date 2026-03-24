@@ -1,0 +1,33 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    container_name: obligatorio-sql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Passw0rd
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourStrong!Passw0rd", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - mssql_data:/var/opt/mssql
+  webapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: obligatorio-webapi
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=ObligatorioDb;User ID=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;Encrypt=True
+      # optional: ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "8080:8080"
+
+volumes:
+  mssql_data:
